@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- ViewPagers used with Fragments need an ID even if created programatically -->
+    <item type="id" name="viewPager"/>
+</resources>

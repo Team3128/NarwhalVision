@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/NarwhalVision.iml" filepath="$PROJECT_DIR$/NarwhalVision.iml" />
+      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/openCV-310/openCV-310.iml" filepath="$PROJECT_DIR$/openCV-310/openCV-310.iml" />
+    </modules>
+  </component>
+</project>
