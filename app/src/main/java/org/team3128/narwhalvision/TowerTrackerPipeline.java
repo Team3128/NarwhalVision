@@ -53,8 +53,8 @@ public class TowerTrackerPipeline
 
 	public void loadSettings()
 	{
-		lowerLimit = new Scalar(Settings.lowH, Settings.lowS, Settings.lowV, 0);
-		upperLimit = new Scalar(Settings.highH, Settings.highS, Settings.highV, 255);
+		lowerLimit = new Scalar(Settings.lowH, Settings.lowS, Settings.lowV);
+		upperLimit = new Scalar(Settings.highH, Settings.highS, Settings.highV);
 
 		Log.i(TAG, "Thresholding from " + lowerLimit.toString() + " to " + upperLimit.toString());
 	}
@@ -64,7 +64,7 @@ public class TowerTrackerPipeline
 	 *
 	 * @return What should be displayed on the phone screen.
 	 */
-	public Mat processImage(Mat frame)
+	public Mat processImage(Mat frame, boolean showColorFilter)
 	{
 		//RGBA to RGB
 		Imgproc.cvtColor(frame, rgbImg, Imgproc.COLOR_RGBA2RGB);
@@ -74,6 +74,12 @@ public class TowerTrackerPipeline
 
 		//HSV threshold
 		Core.inRange(hsvImage, lowerLimit, upperLimit, filteredImage);
+
+		if(showColorFilter)
+		{
+			Imgproc.cvtColor(filteredImage, outputImage, Imgproc.COLOR_GRAY2RGBA);
+			return outputImage;
+		}
 
 		//find contours
 		foundContours.clear();
@@ -139,8 +145,10 @@ public class TowerTrackerPipeline
 
 		}
 
-		//Imgproc.cvtColor(filteredImage, outputImage, Imgproc.COLOR_GRAY2RGBA);
-
 		return frame;
+
+
 	}
+
+
 }

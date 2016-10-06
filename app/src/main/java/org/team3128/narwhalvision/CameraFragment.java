@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Switch;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
@@ -31,6 +32,8 @@ public class CameraFragment extends PageSwapListenerFragment implements CameraBr
 	private static final String TAG = "NVCamera";
 
 	private JavaCameraView mOpenCvCameraView;
+
+	private Switch colorFilterSwitch;
 
 	private TowerTrackerPipeline pipeline;
 
@@ -84,6 +87,7 @@ public class CameraFragment extends PageSwapListenerFragment implements CameraBr
 		mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE);
 		mOpenCvCameraView.setCvCameraViewListener(this);
 
+		colorFilterSwitch = (Switch) content.findViewById(R.id.colorFilterSwitch);
 		return content;
 	}
 
@@ -124,10 +128,19 @@ public class CameraFragment extends PageSwapListenerFragment implements CameraBr
 	}
 
 
+	@Override
+	public void onSwapIn()
+	{
+		if(pipeline != null)
+		{
+			pipeline.loadSettings();
+		}
+	}
+
 	public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame)
 	{
 		Mat rgbImg = inputFrame.rgba();
-		return pipeline.processImage(rgbImg);
+		return pipeline.processImage(rgbImg, colorFilterSwitch.isChecked());
 	}
 
 }

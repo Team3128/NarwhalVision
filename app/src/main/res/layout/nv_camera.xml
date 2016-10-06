@@ -13,4 +13,11 @@
             opencv:show_fps="true"
             opencv:camera_id="any" />
 
+    <Switch
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Color Filter"
+        android:id="@+id/colorFilterSwitch"
+        android:layout_gravity="right|bottom"/>
+
 </FrameLayout>

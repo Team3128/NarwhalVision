@@ -152,7 +152,7 @@ public class ImageFileFragment extends PageSwapListenerFragment
 
 		Imgproc.cvtColor(testImage, rgbaImg, Imgproc.COLOR_BGRA2RGBA);
 
-		Mat result = pipeline.processImage(rgbaImg);
+		Mat result = pipeline.processImage(rgbaImg, false);
 
 		//convert Mat to Bitmap
 		Bitmap resultBitmap = Bitmap.createBitmap(result.cols(), result.rows(), Bitmap.Config.ARGB_8888);
