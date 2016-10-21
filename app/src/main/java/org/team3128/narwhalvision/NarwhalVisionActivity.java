@@ -1,18 +1,22 @@
 package org.team3128.narwhalvision;
 
 import android.content.Context;
+import android.net.nsd.NsdManager;
+import android.net.nsd.NsdServiceInfo;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.view.WindowManager;
 
 public class NarwhalVisionActivity extends FragmentActivity
 {
 
-	private final static String PREFS_FILE_NAME = "NarwhalVision";
+	private final static String TAG = "NarwhalVision";
+	private final static String PREFS_FILE_NAME = TAG;
 
 	private final int NUM_FRAGMENTS = 3;
 
@@ -23,6 +27,47 @@ public class NarwhalVisionActivity extends FragmentActivity
 
 	//used so that we get the old page when the page changes
 	private int currentPage = 0;
+
+	private NsdManager mdnsDiscoverer;
+
+	private class RoborioDiscoveryListener implements NsdManager.DiscoveryListener
+	{
+		@Override
+		public void onServiceLost(NsdServiceInfo service) {
+			// When the network service is no longer available.
+			// Internal bookkeeping code goes here.
+			Log.e(TAG, "service lost" + service);
+		}
+
+		@Override
+		public void onDiscoveryStopped(String serviceType) {
+			Log.i(TAG, "Discovery stopped: " + serviceType);
+		}
+
+		@Override
+		public void onServiceFound(NsdServiceInfo serviceInfo)
+		{
+			Log.i(TAG, "Found service: " + serviceInfo.toString());
+			//if(serviceInfo.getServiceType().equals())
+		}
+
+		@Override
+		public void onStartDiscoveryFailed(String serviceType, int errorCode) {
+			Log.e(TAG, "Discovery failed: Error code:" + errorCode);
+		}
+
+		@Override
+		public void onStopDiscoveryFailed(String serviceType, int errorCode) {
+			Log.e(TAG, "Discovery failed: Error code:" + errorCode);
+		}
+
+		@Override
+		public void onDiscoveryStarted(String serviceType)
+		{
+
+		}
+
+	}
 
 	public class NVPagerAdapter extends FragmentPagerAdapter
 	{
@@ -118,7 +163,8 @@ public class NarwhalVisionActivity extends FragmentActivity
 
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-
+		mdnsDiscoverer = (NsdManager) getSystemService(Context.NSD_SERVICE);
+		mdnsDiscoverer.discoverServices("*", NsdManager.PROTOCOL_DNS_SD, new RoborioDiscoveryListener());
 	}
 
 	@Override

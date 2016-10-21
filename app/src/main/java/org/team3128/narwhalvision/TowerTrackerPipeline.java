@@ -123,7 +123,7 @@ public class TowerTrackerPipeline
 
 			double solidity = Imgproc.contourArea(matOfPoint) / area;
 
-			double score = area * (1.0/solidity);
+			double score = 1.0 / (Math.abs(area - Settings.targetArea) * Math.abs(solidity - Settings.targetSolidity));
 
 			if(bestCountour == null || score > bestScore)
 			{
