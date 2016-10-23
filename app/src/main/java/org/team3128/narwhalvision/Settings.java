@@ -10,6 +10,9 @@ public class Settings
 	//color thresholding settings
 	public static int lowH, highH, lowS, highS, lowV, highV;
 
+	//image processing options
+	public static int targetArea, targetSolidity, targetAspectRatio;
+
 	//path to last image used in image test screen
 	//null if unselected
 	public static String testImagePath;
