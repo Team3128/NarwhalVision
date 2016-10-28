@@ -1,6 +1,7 @@
 package org.team3128.narwhalvision;
 
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
@@ -11,7 +12,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
-import android.widget.Space;
 import android.widget.Toast;
 
 import com.stackoverflow.RangeInputFilter;
@@ -36,12 +36,12 @@ public class SettingsFragment extends NarwhalVisionFragment implements TextWatch
 	EditText editHeight;
 	EditText editWidth;
 
-	Space minHBlock;
-	Space maxHBlock;
-	Space minSBlock;
-	Space maxSBlock;
-	Space minVBlock;
-	Space maxVBlock;
+	View minHBlock;
+	View maxHBlock;
+	View minSBlock;
+	View maxSBlock;
+	View minVBlock;
+	View maxVBlock;
 
 
 	public SettingsFragment()
@@ -93,12 +93,12 @@ public class SettingsFragment extends NarwhalVisionFragment implements TextWatch
 		editWidth = (EditText) content.findViewById(R.id.editWidth);
 		editHeight = (EditText) content.findViewById(R.id.editHeight);
 
-		maxHBlock = (Space) content.findViewById(R.id.maxHSpace);
-		maxSBlock = (Space) content.findViewById(R.id.maxSSpace);
-		maxVBlock = (Space) content.findViewById(R.id.maxVSpace);
-		minHBlock = (Space) content.findViewById(R.id.minHSpace);
-		minSBlock = (Space) content.findViewById(R.id.minSSpace);
-		minVBlock = (Space) content.findViewById(R.id.minVSpace);
+		maxHBlock = content.findViewById(R.id.maxHView);
+		maxSBlock = content.findViewById(R.id.maxSView);
+		maxVBlock = content.findViewById(R.id.maxVView);
+		minHBlock = content.findViewById(R.id.minHView);
+		minSBlock = content.findViewById(R.id.minSView);
+		minVBlock = content.findViewById(R.id.minVView);
 
 		//set range filters
 		InputFilter[] byteFilter = new InputFilter[]{new RangeInputFilter(0, 255)};
@@ -110,16 +110,18 @@ public class SettingsFragment extends NarwhalVisionFragment implements TextWatch
 		editMaxS.setFilters(byteFilter);
 		editMaxV.setFilters(byteFilter);
 
+		populateFromSettings();
+		updateColorViews();
+
 		//set change listeners
+		//NOTE: we need to do this AFTER populating the fields, or things get screwed up
 		editMinH.addTextChangedListener(this);
 		editMinS.addTextChangedListener(this);
 		editMinV.addTextChangedListener(this);
 		editMaxH.addTextChangedListener(this);
 		editMaxS.addTextChangedListener(this);
 		editMaxV.addTextChangedListener(this);
-
-		populateFromSettings();
-
+		
 		return content;
 	}
 
@@ -154,8 +156,8 @@ public class SettingsFragment extends NarwhalVisionFragment implements TextWatch
 
 			Settings.targetArea = Integer.parseInt(editArea.getText().toString());
 			Settings.targetSolidity = Integer.parseInt(editSolidity.getText().toString());
-			Settings.targetWidth = Integer.parseInt(editHeight.getText().toString());
-			Settings.targetHeight = Integer.parseInt(editWidth.getText().toString());
+			Settings.targetWidth = Integer.parseInt(editWidth.getText().toString());
+			Settings.targetHeight = Integer.parseInt(editHeight.getText().toString());
 		}
 		catch(NumberFormatException ex)
 		{
@@ -177,9 +179,36 @@ public class SettingsFragment extends NarwhalVisionFragment implements TextWatch
 
 	}
 
+	/**
+	 * wrapper around Android's hsv conversion method that deals with the weird arguments
+	 * @param h
+	 * @param s
+	 * @param v
+	 * @return
+	 */
+	public int colorFromHSV(int h, int s, int v)
+	{
+		return Color.HSVToColor(new float[]{h * 255F/ 360F, s/255F, v/255F});
+	}
+
 	@Override
 	public void afterTextChanged(Editable s)
 	{
+		Log.d(TAG, "Updating colors");
 
+		loadEnteredValues();
+
+		updateColorViews();
+	}
+	
+	private void updateColorViews()
+	{
+		//update color previews
+		minHBlock.setBackgroundColor(colorFromHSV(Settings.lowH, 255, 255));
+		maxHBlock.setBackgroundColor(colorFromHSV(Settings.highH, 255, 255));
+		minSBlock.setBackgroundColor(colorFromHSV(Settings.lowH, Settings.lowS, 255));
+		maxSBlock.setBackgroundColor(colorFromHSV(Settings.highH, Settings.highS, 255));
+		minVBlock.setBackgroundColor(colorFromHSV(0, 0, Settings.lowV));
+		maxVBlock.setBackgroundColor(colorFromHSV(0, 0, Settings.highV));
 	}
 }
