@@ -11,7 +11,10 @@ public class Settings
 	public static int lowH, highH, lowS, highS, lowV, highV;
 
 	//image processing options
-	public static int targetArea, targetSolidity, targetAspectRatio;
+	public static int targetArea, targetSolidity;
+
+	//one ratio saved as two parts for the settings screen
+	public static int targetWidth, targetHeight;
 
 	//path to last image used in image test screen
 	//null if unselected
@@ -46,6 +49,11 @@ public class Settings
 		highV = prefs.getInt("highV", 255);
 
 		testImagePath = prefs.getString("testImagePath", null);
+
+		targetArea = prefs.getInt("targetArea", 50);
+		targetSolidity = prefs.getInt("targetSolidity", 50);
+		targetHeight = prefs.getInt("targetHeight", 1);
+		targetWidth = prefs.getInt("targetWidth", 1);
 	}
 
 	/**
@@ -65,6 +73,19 @@ public class Settings
 
 		editor.putString("testImagePath", testImagePath);
 
+		editor.putInt("targetArea", targetArea);
+		editor.putInt("targetSolidity", targetSolidity);
+		editor.putInt("targetHeight", targetHeight);
+		editor.putInt("targetWidth", targetWidth);
+
 		editor.apply();
+	}
+
+	/**
+	 * Get the target aspect ratio as a decimal, width over height
+	 */
+	static double getTargetAspectRatio()
+	{
+		return targetWidth / ((double)targetHeight);
 	}
 }

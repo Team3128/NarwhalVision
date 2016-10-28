@@ -51,6 +51,10 @@ public class TowerTrackerPipeline
 		loadSettings();
 	}
 
+	/**
+	 * Reloads the color settings from the global variables.
+	 * THe other settings are used as soon as they are changed in the Settings class
+	 */
 	public void loadSettings()
 	{
 		lowerLimit = new Scalar(Settings.lowH, Settings.lowS, Settings.lowV);
@@ -60,7 +64,7 @@ public class TowerTrackerPipeline
 	}
 
 	/**
-	 * Process a frame.
+	 * Process a frame according the the current settings.
 	 *
 	 * @return What should be displayed on the phone screen.
 	 */
@@ -98,8 +102,11 @@ public class TowerTrackerPipeline
 				matPointIter.remove();
 				continue;
 			}
-			float aspect = ((float)boundingBox.width) / ((float)boundingBox.height);
-			if(aspect < 1.0)
+			double aspect = ((double)boundingBox.width) / ((double)boundingBox.height);
+			double aspectQuotient = aspect / Settings.getTargetAspectRatio();
+
+			//if the aspect ratios are within a factor of 2 of each other...
+			if(aspectQuotient > .5 && aspectQuotient < 2)
 			{
 				matPointIter.remove();
 				continue;
@@ -123,7 +130,16 @@ public class TowerTrackerPipeline
 
 			double solidity = Imgproc.contourArea(matOfPoint) / area;
 
-			double score = 1.0 / (Math.abs(area - Settings.targetArea) * Math.abs(solidity - Settings.targetSolidity));
+			double aspect = ((double)boundingBox.width) / ((double)boundingBox.height);
+			double aspectQuotient = aspect / Settings.getTargetAspectRatio();
+
+			//if the target aspect ratio was the larger one, flip the fraction
+			if(aspectQuotient < 1)
+			{
+				aspectQuotient = 1/aspectQuotient;
+			}
+
+			double score = 1.0 / (Math.abs(area - Settings.targetArea) * Math.abs(solidity - Settings.targetSolidity * aspectQuotient));
 
 			if(bestCountour == null || score > bestScore)
 			{

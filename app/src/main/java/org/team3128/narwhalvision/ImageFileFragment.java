@@ -15,9 +15,6 @@ import android.widget.ImageView;
 
 import com.ipaulpro.afilechooser.utils.FileUtils;
 
-import org.opencv.android.BaseLoaderCallback;
-import org.opencv.android.LoaderCallbackInterface;
-import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 import org.opencv.imgcodecs.Imgcodecs;
@@ -28,7 +25,7 @@ import java.io.File;
 /**
  * Viewer which runs images through the pipeline instead of the camera data.
  */
-public class ImageFileFragment extends PageSwapListenerFragment
+public class ImageFileFragment extends NarwhalVisionFragment
 {
 	public ImageFileFragment()
 	{
@@ -42,36 +39,6 @@ public class ImageFileFragment extends PageSwapListenerFragment
 	private Button loadImageButton;
 
 	private TowerTrackerPipeline pipeline;
-
-	private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(getContext()) {
-		@Override
-		public void onManagerConnected(int status) {
-			switch (status) {
-				case LoaderCallbackInterface.SUCCESS:
-				{
-					Log.i(TAG, "OpenCV loaded successfully");
-
-					//these are the Tower Tracker defaults
-					pipeline = new TowerTrackerPipeline(67F);
-
-					if(Settings.testImagePath == null || !new File(Settings.testImagePath).exists())
-					{
-						//get a new file path
-						invokeImageChooser();
-					}
-					else
-					{
-						refreshImage();
-					}
-				} break;
-				default:
-				{
-					super.onManagerConnected(status);
-				} break;
-			}
-		}
-	};
-
 
 	/** Called when the activity is first created. */
 	@Override
@@ -108,19 +75,6 @@ public class ImageFileFragment extends PageSwapListenerFragment
 		super.onPause();
 	}
 
-	@Override
-	public void onResume()
-	{
-		super.onResume();
-		if (!OpenCVLoader.initDebug()) {
-			Log.d(TAG, "Internal OpenCV library not found. Using OpenCV Manager for initialization");
-			OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_0_0, getContext(), mLoaderCallback);
-		} else {
-			Log.d(TAG, "OpenCV library found inside package. Using it!");
-			mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
-		}
-
-	}
 
 	@Override
 	public void onSwapIn()
@@ -134,6 +88,23 @@ public class ImageFileFragment extends PageSwapListenerFragment
 
 	public void onDestroy() {
 		super.onDestroy();
+	}
+
+	@Override
+	public void onOpenCVLoaded()
+	{
+		//these are the Tower Tracker defaults
+		pipeline = new TowerTrackerPipeline(67F);
+
+		if(Settings.testImagePath == null || !new File(Settings.testImagePath).exists())
+		{
+			//get a new file path
+			invokeImageChooser();
+		}
+		else
+		{
+			refreshImage();
+		}
 	}
 
 	private void refreshImage()

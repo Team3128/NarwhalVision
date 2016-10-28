@@ -12,6 +12,10 @@ import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.WindowManager;
 
+import org.opencv.android.BaseLoaderCallback;
+import org.opencv.android.LoaderCallbackInterface;
+import org.opencv.android.OpenCVLoader;
+
 public class NarwhalVisionActivity extends FragmentActivity
 {
 
@@ -23,12 +27,15 @@ public class NarwhalVisionActivity extends FragmentActivity
 	private ViewPager viewPager;
 
 	//lazily initialized as pages are created
-	private PageSwapListenerFragment[] pages = new PageSwapListenerFragment[NUM_FRAGMENTS];
+	private NarwhalVisionFragment[] pages = new NarwhalVisionFragment[NUM_FRAGMENTS];
 
 	//used so that we get the old page when the page changes
 	private int currentPage = 0;
 
 	private NsdManager mdnsDiscoverer;
+
+	//OpenCV objects cannot be created until the library has been loaded
+	private boolean openCVLoaded;
 
 	private class RoborioDiscoveryListener implements NsdManager.DiscoveryListener
 	{
@@ -69,6 +76,7 @@ public class NarwhalVisionActivity extends FragmentActivity
 
 	}
 
+
 	public class NVPagerAdapter extends FragmentPagerAdapter
 	{
 
@@ -86,7 +94,7 @@ public class NarwhalVisionActivity extends FragmentActivity
 		@Override
 		public Fragment getItem(int position) {
 
-			PageSwapListenerFragment newFragment;
+			NarwhalVisionFragment newFragment;
 			switch (position)
 			{
 				case 0:
@@ -143,11 +151,16 @@ public class NarwhalVisionActivity extends FragmentActivity
 					{
 						pages[currentPage].onSwapOut();
 					}
+
 					currentPage = position;
 
 					if (pages[position] != null)
 					{
 						pages[position].onSwapIn();
+						if(openCVLoaded)
+						{
+							pages[position].onOpenCVLoaded();
+						}
 					}
 				}
 			}
@@ -173,4 +186,47 @@ public class NarwhalVisionActivity extends FragmentActivity
 		super.onStop();
 		Settings.savePreferences();
 	}
+
+	@Override
+	protected void onResume()
+	{
+		super.onResume();
+		if (!OpenCVLoader.initDebug()) {
+			Log.d(TAG, "Internal OpenCV library not found. Using OpenCV Manager for initialization");
+			OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_0_0, this, mLoaderCallback);
+		} else {
+			Log.d(TAG, "OpenCV library found inside package. Using it!");
+			mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
+		}
+	}
+
+	// callback called when OpenCV is loaded
+	private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
+		@Override
+		public void onManagerConnected(int status) {
+			switch (status) {
+				case LoaderCallbackInterface.SUCCESS:
+				{
+					Log.i(TAG, "OpenCV loaded successfully");
+					openCVLoaded = true;
+
+					if(pages[currentPage] == null)
+					{
+						Log.e(TAG, "...what?  OpenCV loaded before the UI did");
+					}
+					else
+					{
+						pages[currentPage].onOpenCVLoaded();
+					}
+
+				} break;
+				default:
+				{
+					Log.i(TAG, "OpenCV loading failed: status " + status); //why couldn't they use an actual enum?
+
+					super.onManagerConnected(status);
+				} break;
+			}
+		}
+	};
 }

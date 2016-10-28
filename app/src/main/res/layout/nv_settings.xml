@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:android="http://schemas.android.com/apk/res/android">
@@ -8,7 +9,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textColor="#969696"
-        android:text="Settings"
+        android:text="Target Settings"
         android:id="@+id/textSettingsTitle"
         android:textAppearance="@android:style/TextAppearance.Holo.Large"
         android:paddingLeft="5dp"/>
@@ -26,7 +27,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="Target Hue:"/>
+            android:text="Hue:"/>
 
         <EditText
             android:layout_width="wrap_content"
@@ -36,6 +37,11 @@
             android:id="@+id/editMinH"
             android:textColor="#000000"
             android:hint="Min"/>
+
+        <Space
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:id="@+id/minHSpace"/>
 
         <TextView
             android:layout_width="wrap_content"
@@ -50,6 +56,12 @@
             android:ems="3"
             android:id="@+id/editMaxH"
             android:hint="Max"/>
+
+        <Space
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:id="@+id/maxHSpace"/>
+
     </LinearLayout>
 
     <LinearLayout
@@ -64,7 +76,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="Target Saturation:"/>
+            android:text="Saturation:"/>
 
         <EditText
             android:layout_width="wrap_content"
@@ -74,6 +86,11 @@
             android:id="@+id/editMinS"
             android:textColor="#000000"
             android:hint="Min"/>
+
+        <Space
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:id="@+id/minSSpace"/>
 
         <TextView
             android:layout_width="wrap_content"
@@ -88,6 +105,11 @@
             android:ems="3"
             android:id="@+id/editMaxS"
             android:hint="Max"/>
+
+        <Space
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:id="@+id/maxSSpace"/>
     </LinearLayout>
 
     <LinearLayout
@@ -95,13 +117,14 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/sControls"
-        android:layout_alignParentStart="true">
+        android:layout_alignParentStart="true"
+        android:id="@+id/vControls">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="Target Value:"/>
+            android:text="Value:"/>
 
         <EditText
             android:layout_width="wrap_content"
@@ -111,6 +134,11 @@
             android:id="@+id/editMinV"
             android:textColor="#000000"
             android:hint="Min"/>
+
+        <Space
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:id="@+id/minVSpace"/>
 
         <TextView
             android:layout_width="wrap_content"
@@ -125,6 +153,111 @@
             android:ems="3"
             android:id="@+id/editMaxV"
             android:hint="Max"/>
+
+        <Space
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:id="@+id/maxVSpace"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/vControls"
+        android:layout_alignParentStart="true"
+        android:id="@+id/areaControls">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="% of image area"
+            tools:text="Size: "/>
+        <EditText
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:inputType="number|numberSigned"
+            android:ems="3"
+            android:id="@+id/editArea"
+            android:textColor="#000000"
+            />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="% of image area"/>
+
+
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/areaControls"
+        android:layout_alignParentStart="true"
+        android:id="@+id/solidityControls">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="Solidity:"/>
+
+        <EditText
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:inputType="number|numberSigned"
+            android:ems="3"
+            android:id="@+id/editSolidity"
+            android:textColor="#000000"
+            />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="% of object area should be filled in"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/solidityControls"
+        android:layout_alignParentStart="true"
+        android:id="@+id/aspectRatioControls">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="Aspect Ratio:"
+            android:id="@+id/textTargetAspect"/>
+
+        <EditText
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:inputType="number|numberSigned"
+            android:ems="4"
+            android:id="@+id/editWidth"
+            android:textColor="#000000"
+            android:hint="Width"/>
+
+        <TextView
+            android:text="X"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+        <EditText
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:inputType="number|numberSigned"
+            android:ems="4"
+            android:id="@+id/editHeight"
+            android:hint="Height"/>
     </LinearLayout>
 
 
