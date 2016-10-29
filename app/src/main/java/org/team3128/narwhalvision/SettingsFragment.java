@@ -110,6 +110,10 @@ public class SettingsFragment extends NarwhalVisionFragment implements TextWatch
 		editMaxS.setFilters(byteFilter);
 		editMaxV.setFilters(byteFilter);
 
+		InputFilter[] percentFilter = new InputFilter[]{new RangeInputFilter(0, 100)};
+		editArea.setFilters(percentFilter);
+		editSolidity.setFilters(percentFilter);
+
 		populateFromSettings();
 		updateColorViews();
 
@@ -135,7 +139,7 @@ public class SettingsFragment extends NarwhalVisionFragment implements TextWatch
 		editMaxS.setText(Integer.toString(Settings.highS));
 		editMaxV.setText(Integer.toString(Settings.highV));
 
-		editArea.setText(Integer.toString(Settings.targetArea));
+		editArea.setText(Integer.toString(Settings.minArea));
 		editSolidity.setText(Integer.toString(Settings.targetSolidity));
 		editHeight.setText(Integer.toString(Settings.targetHeight));
 		editWidth.setText(Integer.toString(Settings.targetWidth));
@@ -146,6 +150,8 @@ public class SettingsFragment extends NarwhalVisionFragment implements TextWatch
 	{
 		try
 		{
+			//TODO: don't parse blank fields
+
 			Settings.lowH = Integer.parseInt(editMinH.getText().toString());
 			Settings.lowS = Integer.parseInt(editMinS.getText().toString());
 			Settings.lowV = Integer.parseInt(editMinV.getText().toString());
@@ -154,7 +160,7 @@ public class SettingsFragment extends NarwhalVisionFragment implements TextWatch
 			Settings.highS = Integer.parseInt(editMaxS.getText().toString());
 			Settings.highV = Integer.parseInt(editMaxV.getText().toString());
 
-			Settings.targetArea = Integer.parseInt(editArea.getText().toString());
+			Settings.minArea = Integer.parseInt(editArea.getText().toString());
 			Settings.targetSolidity = Integer.parseInt(editSolidity.getText().toString());
 			Settings.targetWidth = Integer.parseInt(editWidth.getText().toString());
 			Settings.targetHeight = Integer.parseInt(editHeight.getText().toString());
@@ -188,7 +194,7 @@ public class SettingsFragment extends NarwhalVisionFragment implements TextWatch
 	 */
 	public int colorFromHSV(int h, int s, int v)
 	{
-		return Color.HSVToColor(new float[]{h * 255F/ 360F, s/255F, v/255F});
+		return Color.HSVToColor(new float[]{h * 360F / 255F, s/255F, v/255F});
 	}
 
 	@Override

@@ -11,7 +11,7 @@ public class Settings
 	public static int lowH, highH, lowS, highS, lowV, highV;
 
 	//image processing options
-	public static int targetArea, targetSolidity;
+	public static int minArea, targetSolidity;
 
 	//one ratio saved as two parts for the settings screen
 	public static int targetWidth, targetHeight;
@@ -44,13 +44,13 @@ public class Settings
 		lowS = prefs.getInt("lowS", 0);
 		lowV = prefs.getInt("lowV", 0);
 
-		highH = prefs.getInt("highH", 20);
+		highH = prefs.getInt("highH", 255);
 		highS = prefs.getInt("highS", 255);
 		highV = prefs.getInt("highV", 255);
 
 		testImagePath = prefs.getString("testImagePath", null);
 
-		targetArea = prefs.getInt("targetArea", 50);
+		minArea = prefs.getInt("minArea", 50);
 		targetSolidity = prefs.getInt("targetSolidity", 50);
 		targetHeight = prefs.getInt("targetHeight", 1);
 		targetWidth = prefs.getInt("targetWidth", 1);
@@ -73,7 +73,7 @@ public class Settings
 
 		editor.putString("testImagePath", testImagePath);
 
-		editor.putInt("targetArea", targetArea);
+		editor.putInt("minArea", minArea);
 		editor.putInt("targetSolidity", targetSolidity);
 		editor.putInt("targetHeight", targetHeight);
 		editor.putInt("targetWidth", targetWidth);

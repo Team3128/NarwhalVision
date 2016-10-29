@@ -106,8 +106,6 @@ public class CameraFragment extends NarwhalVisionFragment implements CameraBridg
 		//I made a small *ahem* change to to the OpenCV library and added JavaCameraView.getCamera().
 		Camera.Parameters cameraParams = mOpenCvCameraView.getCamera().getParameters();
 
-		cameraParams.setPreviewSize(640, 480);
-
 		if(getContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH))
 		{
 			Log.i(TAG, "Turning on flashlight");

@@ -7,17 +7,25 @@
                    android:layout_height="match_parent">
 
 
-    <ImageView
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:id="@+id/imageView"
-        android:layout_gravity="center"/>
-
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Load Img"
         android:id="@+id/loadButton"
         android:layout_gravity="left|bottom"/>
+
+    <ToggleButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/colorThresholdToggle"
+        android:textOff="Color Threshold"
+        android:textOn="Color Threshold"
+        android:layout_gravity="right|bottom"/>
+
+    <ImageView
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:id="@+id/imageView"
+        android:layout_gravity="center"/>
 
 </FrameLayout>

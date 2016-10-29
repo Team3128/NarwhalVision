@@ -97,16 +97,18 @@ public class TowerTrackerPipeline
 		{
 			MatOfPoint matOfPoint = matPointIter.next();
 			Rect boundingBox = Imgproc.boundingRect(matOfPoint);
-			if(boundingBox.height < 20 || boundingBox.width < 20)
+
+			double aspect = ((double)boundingBox.width) / ((double)boundingBox.height);
+			double aspectQuotient = aspect / Settings.getTargetAspectRatio();
+			
+			if((boundingBox.area() * 100)/ (frame.width() * frame.height()) < Settings.minArea)
 			{
 				matPointIter.remove();
 				continue;
 			}
-			double aspect = ((double)boundingBox.width) / ((double)boundingBox.height);
-			double aspectQuotient = aspect / Settings.getTargetAspectRatio();
 
-			//if the aspect ratios are within a factor of 2 of each other...
-			if(aspectQuotient > .5 && aspectQuotient < 2)
+			//if the aspect ratios are within a factor of 4 of each other...
+			if(aspectQuotient <= .25 || aspectQuotient >= 4)
 			{
 				matPointIter.remove();
 				continue;
@@ -126,9 +128,9 @@ public class TowerTrackerPipeline
 		{
 			//for now, we just rank by area and solidity (the goal is NOT very solid)
 			Rect boundingBox = Imgproc.boundingRect(matOfPoint);
-			double area = boundingBox.area();
+			double area = Imgproc.contourArea(matOfPoint);
 
-			double solidity = Imgproc.contourArea(matOfPoint) / area;
+			double solidityPercent = (boundingBox.width * boundingBox.height * 100) / area;
 
 			double aspect = ((double)boundingBox.width) / ((double)boundingBox.height);
 			double aspectQuotient = aspect / Settings.getTargetAspectRatio();
@@ -139,13 +141,13 @@ public class TowerTrackerPipeline
 				aspectQuotient = 1/aspectQuotient;
 			}
 
-			double score = 1.0 / (Math.abs(area - Settings.targetArea) * Math.abs(solidity - Settings.targetSolidity * aspectQuotient));
+			double score = area / (Math.abs(solidityPercent - Settings.targetSolidity) * aspectQuotient);
 
 			if(bestCountour == null || score > bestScore)
 			{
 				bestCountour = matOfPoint;
 				bestScore = score;
-				winnerSolidity = solidity;
+				winnerSolidity = solidityPercent;
 				winnerBoundingBox = boundingBox;
 			}
 

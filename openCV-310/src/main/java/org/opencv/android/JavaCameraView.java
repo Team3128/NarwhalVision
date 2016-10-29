@@ -147,7 +147,8 @@ public class JavaCameraView extends CameraBridgeViewBase implements PreviewCallb
 
                 if (sizes != null) {
 	                Size frameSize;
-                    if(Build.MODEL.equals("SGH-T999")) //workaround for broken Galaxy S3 camera library
+
+	                if(Build.MODEL.equals("SGH-T999")) //workaround for broken Galaxy S3 camera library
                     {
 						frameSize = new Size();
 	                    frameSize.height = 480;
@@ -159,7 +160,6 @@ public class JavaCameraView extends CameraBridgeViewBase implements PreviewCallb
 	                    frameSize = calculateCameraFrameSize(sizes, new JavaCameraSizeAccessor(), width, height);
 
                     }
-
 
                     params.setPreviewFormat(ImageFormat.NV21);
                     Log.d(TAG, "Set preview size to " + Integer.valueOf((int)frameSize.width) + "x" + Integer.valueOf((int)frameSize.height));

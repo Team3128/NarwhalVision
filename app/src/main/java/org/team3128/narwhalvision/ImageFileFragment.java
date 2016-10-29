@@ -11,7 +11,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
+import android.widget.ToggleButton;
 
 import com.ipaulpro.afilechooser.utils.FileUtils;
 
@@ -39,6 +41,8 @@ public class ImageFileFragment extends NarwhalVisionFragment
 	private Button loadImageButton;
 
 	private TowerTrackerPipeline pipeline;
+	private ToggleButton colorThresholdToggle;
+
 
 	/** Called when the activity is first created. */
 	@Override
@@ -56,6 +60,7 @@ public class ImageFileFragment extends NarwhalVisionFragment
 
 		loadImageButton = (Button) content.findViewById(R.id.loadButton);
 		resultView = (ImageView) content.findViewById(R.id.imageView);
+		colorThresholdToggle = (ToggleButton) content.findViewById(R.id.colorThresholdToggle);
 
 		loadImageButton.setOnClickListener(new View.OnClickListener()
 		{
@@ -63,6 +68,18 @@ public class ImageFileFragment extends NarwhalVisionFragment
 			public void onClick(View v)
 			{
 				invokeImageChooser();
+			}
+		});
+
+		colorThresholdToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
+		{
+			@Override
+			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
+			{
+				if(hasValidImage())
+				{
+					refreshImage();
+				}
 			}
 		});
 
@@ -96,15 +113,25 @@ public class ImageFileFragment extends NarwhalVisionFragment
 		//these are the Tower Tracker defaults
 		pipeline = new TowerTrackerPipeline(67F);
 
-		if(Settings.testImagePath == null || !new File(Settings.testImagePath).exists())
-		{
-			//get a new file path
-			invokeImageChooser();
-		}
-		else
+		if(hasValidImage())
 		{
 			refreshImage();
 		}
+		else
+		{
+			//get a new file path
+			invokeImageChooser();
+			refreshImage();
+		}
+	}
+
+	/**
+	 * Returns true if refreshImage() can be called, false if invokeImageChooser() must be called first.
+	 * @return
+	 */
+	private boolean hasValidImage()
+	{
+		return Settings.testImagePath != null && new File(Settings.testImagePath).exists();
 	}
 
 	private void refreshImage()
@@ -123,7 +150,7 @@ public class ImageFileFragment extends NarwhalVisionFragment
 
 		Imgproc.cvtColor(testImage, rgbaImg, Imgproc.COLOR_BGRA2RGBA);
 
-		Mat result = pipeline.processImage(rgbaImg, false);
+		Mat result = pipeline.processImage(rgbaImg, colorThresholdToggle.isChecked());
 
 		//convert Mat to Bitmap
 		Bitmap resultBitmap = Bitmap.createBitmap(result.cols(), result.rows(), Bitmap.Config.ARGB_8888);

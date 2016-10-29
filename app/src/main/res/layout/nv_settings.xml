@@ -204,6 +204,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceMedium"
+            android:id="@+id/solidityHeader"
             android:text="Solidity:"/>
 
         <EditText
