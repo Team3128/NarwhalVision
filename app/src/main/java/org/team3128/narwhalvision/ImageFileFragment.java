@@ -83,6 +83,8 @@ public class ImageFileFragment extends NarwhalVisionFragment
 			}
 		});
 
+		notifyLoadingComplete();
+
 		return content;
 	}
 
@@ -111,7 +113,7 @@ public class ImageFileFragment extends NarwhalVisionFragment
 	public void onOpenCVLoaded()
 	{
 		//these are the Tower Tracker defaults
-		pipeline = new TowerTrackerPipeline(67F);
+		pipeline = new TowerTrackerPipeline(67F, 67F);
 
 		if(hasValidImage())
 		{
@@ -150,7 +152,7 @@ public class ImageFileFragment extends NarwhalVisionFragment
 
 		Imgproc.cvtColor(testImage, rgbaImg, Imgproc.COLOR_BGRA2RGBA);
 
-		Mat result = pipeline.processImage(rgbaImg, colorThresholdToggle.isChecked());
+		Mat result = pipeline.processImage(rgbaImg, colorThresholdToggle.isChecked()).first;
 
 		//convert Mat to Bitmap
 		Bitmap resultBitmap = Bitmap.createBitmap(result.cols(), result.rows(), Bitmap.Config.ARGB_8888);

@@ -2,8 +2,6 @@ package org.team3128.narwhalvision;
 
 import org.opencv.core.Rect;
 
-import java.io.Serializable;
-
 /**
  * Class which describes a target
  * It is serialized and sent to the robot.
@@ -11,40 +9,37 @@ import java.io.Serializable;
  * NOTE: it cannot reference any classes available on only one side or the other
  */
 
-public class TargetInformation implements Serializable
+public class TargetInformation
 {
+	// NOTE: these are kept public to give the serializer an easier time
+	// we also use floats so we don't send an unneccessary anount of precision
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -6981674676679127950L;
+	float area;
+	float boundingRectLeft;
+	float boundingRectTop;
+	float boundingRectRight;
+	float boundingRectBottom;
 
-	private double area;
-	private double boundingRectLeft;
-	private double boundingRectTop;
-	private double boundingRectRight;
-	private double boundingRectBottom;
+	float boundingRectHeight, boundingRectWidth;
 
-	private double boundingRectHeight, boundingRectWidth;
+	float boundingRectCenterX, boundingRectCenterY;
 
-	private double boundingRectCenterX, boundingRectCenterY;
+	int imageWidth, imageHeight;
 
-	private int imageWidth, imageHeight;
-
-	private double horizontalFOV, verticalFOV;
+	float horizontalFOV, verticalFOV;
 
 	/**
 	 * Populate from image and index in image
 	 *
 	 * NOTE: we use the width of the target because we are looking up at the target from the ground so height will be parallax-distorted.
 	 */
-	public TargetInformation(Rect target, int imageWidth, int imageHeight, double horizontalFOV, double verticalFOV)
+	public TargetInformation(Rect target, int imageWidth, int imageHeight, float horizontalFOV, float verticalFOV)
 	{
-		area = target.area();
-		boundingRectLeft = target.tl().x;
-		boundingRectBottom = target.br().y;
-		boundingRectTop = target.tl().y;
-		boundingRectRight = target.br().x;
+		area = (float) target.area();
+		boundingRectLeft = (float) target.tl().x;
+		boundingRectBottom = (float) target.br().y;
+		boundingRectTop = (float) target.tl().y;
+		boundingRectRight = (float) target.br().x;
 
 		boundingRectHeight = boundingRectTop - boundingRectBottom;
 		boundingRectWidth = boundingRectRight - boundingRectLeft;
@@ -54,6 +49,13 @@ public class TargetInformation implements Serializable
 
 		this.horizontalFOV = horizontalFOV;
 		this.verticalFOV = verticalFOV;
+	}
+
+	/**
+	 * Blank constructor for serializer
+	 */
+	public TargetInformation()
+	{
 	}
 
 
@@ -66,11 +68,11 @@ public class TargetInformation implements Serializable
 	 *
 	 * @return The estimated distance directly to the target in cm.
 	 */
-	public double getTargetDistance(double targetHeight, double cameraHeight)
+	public float getTargetDistance(float targetHeight, float cameraHeight)
 	{
-		double deltaHeight = targetHeight - cameraHeight;
+		float deltaHeight = targetHeight - cameraHeight;
 
-		double targetDistance = deltaHeight / Math.cos(Math.toRadians(getVerticalAngle()));
+		float targetDistance = (float) (deltaHeight / Math.cos(Math.toRadians(getVerticalAngle())));
 
 		return targetDistance;
 	}
@@ -90,11 +92,11 @@ public class TargetInformation implements Serializable
 	 * Can be positive or negative.  If the object is in the center, it returns 0.
 	 * @return
 	 */
-	public double getHorizontalAngle()
+	public float getHorizontalAngle()
 	{
-		double distanceFromCenter = boundingRectCenterX - imageWidth / 2.0;
+		float distanceFromCenter = boundingRectCenterX - imageWidth / 2.0F;
 
-		return Math.toDegrees(Math.atan(distanceFromCenter * Math.tan(Math.toRadians(horizontalFOV)) / imageWidth));
+		return (float) Math.toDegrees(Math.atan(distanceFromCenter * Math.tan(Math.toRadians(horizontalFOV)) / imageWidth));
 	}
 
 	/**
@@ -111,10 +113,10 @@ public class TargetInformation implements Serializable
 	 * Can be positive or negative.  If the object is in the center, it returns 0.
 	 * @return
 	 */
-	public double getVerticalAngle()
+	public float getVerticalAngle()
 	{
-		double distanceFromCenter = boundingRectCenterY - imageHeight / 2.0;
+		float distanceFromCenter = boundingRectCenterY - imageHeight / 2.0F;
 
-		return Math.toDegrees(Math.atan(distanceFromCenter * Math.tan(Math.toRadians(horizontalFOV)) / imageWidth));
+		return (float) Math.toDegrees(Math.atan(distanceFromCenter * Math.tan(Math.toRadians(horizontalFOV)) / imageWidth));
 	}
 }

@@ -6,6 +6,7 @@ import android.hardware.Camera;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.SurfaceView;
 import android.view.View;
@@ -56,6 +57,8 @@ public class CameraFragment extends NarwhalVisionFragment implements CameraBridg
 		mOpenCvCameraView.setCvCameraViewListener(this);
 
 		colorFilterSwitch = (Switch) content.findViewById(R.id.colorFilterSwitch);
+
+
 		return content;
 	}
 
@@ -75,7 +78,27 @@ public class CameraFragment extends NarwhalVisionFragment implements CameraBridg
 			mOpenCvCameraView.disableView();
 	}
 
-	public void onCameraViewStarted(int width, int height) {
+	@Override
+	public void onStart()
+	{
+		super.onStart();
+		notifyLoadingComplete();
+
+	}
+
+	public void onCameraViewStarted(int width, int height)
+	{
+		//I made a small *ahem* change to to the OpenCV library and added JavaCameraView.getCamera().
+		Camera.Parameters cameraParams = mOpenCvCameraView.getCamera().getParameters();
+
+		if(getContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH))
+		{
+			Log.i(TAG, "Turning on flashlight");
+			cameraParams.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
+			mOpenCvCameraView.getCamera().setParameters(cameraParams);
+		}
+
+		pipeline = new TowerTrackerPipeline(cameraParams.getHorizontalViewAngle(), cameraParams.getVerticalViewAngle());
 	}
 
 	public void onCameraViewStopped()
@@ -95,25 +118,20 @@ public class CameraFragment extends NarwhalVisionFragment implements CameraBridg
 	public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame)
 	{
 		Mat rgbImg = inputFrame.rgba();
-		return pipeline.processImage(rgbImg, colorFilterSwitch.isChecked());
+		Pair<Mat, TargetInformation> result = pipeline.processImage(rgbImg, colorFilterSwitch.isChecked());
+
+		if(result.second != null)
+		{
+			((NarwhalVisionActivity)getActivity()).sendTargetInformation(result.second);
+		}
+
+		return result.first;
 	}
 
 	@Override
 	public void onOpenCVLoaded()
 	{
 		mOpenCvCameraView.enableView();
-
-		//I made a small *ahem* change to to the OpenCV library and added JavaCameraView.getCamera().
-		Camera.Parameters cameraParams = mOpenCvCameraView.getCamera().getParameters();
-
-		if(getContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH))
-		{
-			Log.i(TAG, "Turning on flashlight");
-			cameraParams.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
-			mOpenCvCameraView.getCamera().setParameters(cameraParams);
-		}
-
-		pipeline = new TowerTrackerPipeline(cameraParams.getVerticalViewAngle());
 	}
 
 }

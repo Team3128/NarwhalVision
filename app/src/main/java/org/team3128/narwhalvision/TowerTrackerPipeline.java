@@ -1,6 +1,7 @@
 package org.team3128.narwhalvision;
 
 import android.util.Log;
+import android.util.Pair;
 
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
@@ -31,6 +32,9 @@ public class TowerTrackerPipeline
 	final Scalar RED = new Scalar(255, 0, 0);
 	final Scalar GREEN = new Scalar(0, 255, 0);
 
+	//used for constructing TargetInformation classes
+	final private float horizontalFOV, verticalFOV;
+
 	/*
 	Only construct this class after OpenCV is loaded.
 	This allows it to use OpenCV constructs as class variables.
@@ -38,8 +42,11 @@ public class TowerTrackerPipeline
 	Settings from the Settings class are read and stored when the pipeline is constructed.  Changes to them will not take affect
 	until loadSettings() is called.
 	 */
-	public TowerTrackerPipeline(float cameraFOV)
+	public TowerTrackerPipeline(float horizontalFOV, float verticalFOV)
 	{
+		this.horizontalFOV = horizontalFOV;
+		this.verticalFOV = verticalFOV;
+
 		rgbImg = new Mat();
 		hsvImage = new Mat();
 		filteredImage = new Mat();
@@ -66,9 +73,9 @@ public class TowerTrackerPipeline
 	/**
 	 * Process a frame according the the current settings.
 	 *
-	 * @return What should be displayed on the phone screen.
+	 * @return What should be displayed on the phone screen, and information about the target if one was found.
 	 */
-	public Mat processImage(Mat frame, boolean showColorFilter)
+	public Pair<Mat, TargetInformation> processImage(Mat frame, boolean showColorFilter)
 	{
 		//RGBA to RGB
 		Imgproc.cvtColor(frame, rgbImg, Imgproc.COLOR_RGBA2RGB);
@@ -82,7 +89,7 @@ public class TowerTrackerPipeline
 		if(showColorFilter)
 		{
 			Imgproc.cvtColor(filteredImage, outputImage, Imgproc.COLOR_GRAY2RGBA);
-			return outputImage;
+			return new Pair<>(outputImage, null);
 		}
 
 		//find contours
@@ -100,7 +107,7 @@ public class TowerTrackerPipeline
 
 			double aspect = ((double)boundingBox.width) / ((double)boundingBox.height);
 			double aspectQuotient = aspect / Settings.getTargetAspectRatio();
-			
+
 			if((boundingBox.area() * 100)/ (frame.width() * frame.height()) < Settings.minArea)
 			{
 				matPointIter.remove();
@@ -116,6 +123,11 @@ public class TowerTrackerPipeline
 
 			// Draw rectangles on the image to show countours
 			Imgproc.rectangle(frame, boundingBox.br(), boundingBox.tl(), RED);
+		}
+
+		if(foundContours.isEmpty())
+		{
+			return new Pair<>(frame, null);
 		}
 
 		//now that we've removed the riff-raff, find the best contour
@@ -153,6 +165,8 @@ public class TowerTrackerPipeline
 
 		}
 
+		TargetInformation targetInfo = new TargetInformation(winnerBoundingBox, frame.width(), frame.height(), horizontalFOV, verticalFOV);
+
 
 		//draw a green bounding box
 		if(bestCountour != null)
@@ -163,7 +177,7 @@ public class TowerTrackerPipeline
 
 		}
 
-		return frame;
+		return new Pair<>(frame, targetInfo);
 
 
 	}

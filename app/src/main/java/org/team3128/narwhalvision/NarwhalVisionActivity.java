@@ -11,16 +11,28 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.WindowManager;
+import android.widget.Toast;
+
+import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryo.io.ByteBufferOutput;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
+
+import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.SocketException;
+import java.nio.ByteBuffer;
 
 public class NarwhalVisionActivity extends FragmentActivity
 {
 
 	private final static String TAG = "NarwhalVision";
 	private final static String PREFS_FILE_NAME = TAG;
+
 
 	private final int NUM_FRAGMENTS = 3;
 
@@ -31,11 +43,24 @@ public class NarwhalVisionActivity extends FragmentActivity
 
 	//used so that we get the old page when the page changes
 	private int currentPage = 0;
-
-	private NsdManager mdnsDiscoverer;
-
 	//OpenCV objects cannot be created until the library has been loaded
 	private boolean openCVLoaded;
+
+
+	private NsdManager mdnsDiscoverer;
+	private RoborioDiscoveryListener roborioDiscoveryListener;
+	private RoborioResolveListener roborioResolveListener;
+	private final static String ROBORIO_SERVICE_TYPE="_narwhalvision._udp.";
+
+	//------------------------------------
+	private Kryo kryo;
+	private ByteBufferOutput packetWriter;
+
+
+	private DatagramSocket roborioSocket;
+
+	//legal port per the 2016 game manual
+	final static int NARWHAL_VISION_PORT = 3128;
 
 	private class RoborioDiscoveryListener implements NsdManager.DiscoveryListener
 	{
@@ -55,7 +80,11 @@ public class NarwhalVisionActivity extends FragmentActivity
 		public void onServiceFound(NsdServiceInfo serviceInfo)
 		{
 			Log.i(TAG, "Found service: " + serviceInfo.toString());
-			//if(serviceInfo.getServiceType().equals())
+			if(serviceInfo.getServiceName().contains("roborio-3128-frc"))
+			{
+				Log.i(TAG, "It's the RoboRIO mDNS!  Hooray!");
+				mdnsDiscoverer.resolveService(serviceInfo, roborioResolveListener);
+			}
 		}
 
 		@Override
@@ -74,6 +103,47 @@ public class NarwhalVisionActivity extends FragmentActivity
 
 		}
 
+	}
+
+	private class RoborioResolveListener implements NsdManager.ResolveListener
+	{
+
+		@Override
+		public void onResolveFailed(NsdServiceInfo serviceInfo, int errorCode)
+		{
+			Log.e(TAG, "Failed to resolve RoboRIO: error " + errorCode);
+		}
+
+		@Override
+		public void onServiceResolved(NsdServiceInfo serviceInfo)
+		{
+			onGetNewRoborioAddress(serviceInfo.getHost());
+		}
+	}
+
+	/**
+	 * Called when we get a new RoboRIO address over mDNS
+	 */
+	private void onGetNewRoborioAddress(InetAddress roborioAddress)
+	{
+		//create it if it hasn't been created yet
+		if(roborioSocket == null)
+		{
+			try
+			{
+				roborioSocket = new DatagramSocket();
+			}
+			catch (SocketException e)
+			{
+				Log.e(TAG, "Failed to create roborio socket!");
+				e.printStackTrace();
+			}
+		}
+
+		if(roborioSocket.getInetAddress() != roborioAddress) //check to make sure it isn't the same one
+		{
+			roborioSocket.connect(roborioAddress, NARWHAL_VISION_PORT);
+		}
 	}
 
 
@@ -130,6 +200,10 @@ public class NarwhalVisionActivity extends FragmentActivity
 		super.onCreate(savedInstanceState);
 		Settings.setSharedPreferences(getSharedPreferences(PREFS_FILE_NAME, Context.MODE_PRIVATE));
 
+		//-------------------------------------------------------------------
+		// Set up paged layout
+		//-------------------------------------------------------------------
+
 		viewPager = new ViewPager(this);
 		viewPager.setAdapter(new NVPagerAdapter(getSupportFragmentManager()));
 		setContentView(viewPager);
@@ -176,8 +250,21 @@ public class NarwhalVisionActivity extends FragmentActivity
 
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
+		//-------------------------------------------------------------------
+		// Set up mDNS
+		//-------------------------------------------------------------------
+
 		mdnsDiscoverer = (NsdManager) getSystemService(Context.NSD_SERVICE);
-		mdnsDiscoverer.discoverServices("*", NsdManager.PROTOCOL_DNS_SD, new RoborioDiscoveryListener());
+		roborioDiscoveryListener = new RoborioDiscoveryListener();
+		roborioResolveListener = new RoborioResolveListener();
+		mdnsDiscoverer.discoverServices(ROBORIO_SERVICE_TYPE, NsdManager.PROTOCOL_DNS_SD, roborioDiscoveryListener);
+
+		//-------------------------------------------------------------------
+		// Set up serializer
+		//-------------------------------------------------------------------
+
+		kryo = new Kryo();
+		kryo.register(TargetInformation.class);
 	}
 
 	@Override
@@ -200,6 +287,8 @@ public class NarwhalVisionActivity extends FragmentActivity
 		}
 	}
 
+	boolean notifyFirstFragmentOpenCVLoaded = false;
+
 	// callback called when OpenCV is loaded
 	private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
 		@Override
@@ -210,9 +299,13 @@ public class NarwhalVisionActivity extends FragmentActivity
 					Log.i(TAG, "OpenCV loaded successfully");
 					openCVLoaded = true;
 
+					/*
+					There is a race condition here.  We kick off the OpenCV loader and the Fragment loader at the same time.  If the fragments finish first, everything is fine,
+					as we call onOpenCVLoaded() here. If OpenCV loads first, however, we need to wait until the fragments are finished loading.
+					 */
 					if(pages[currentPage] == null)
 					{
-						Log.e(TAG, "...what?  OpenCV loaded before the UI did");
+						notifyFirstFragmentOpenCVLoaded = true;
 					}
 					else
 					{
@@ -229,4 +322,41 @@ public class NarwhalVisionActivity extends FragmentActivity
 			}
 		}
 	};
+
+	void onFragmentLoaded(NarwhalVisionFragment fragment)
+	{
+		if(notifyFirstFragmentOpenCVLoaded)
+		{
+			fragment.onOpenCVLoaded();
+		}
+	}
+
+	// static buffer used to hold serialized objects
+	// no, as far as I can tell, there's no way to not have a fixed size buffer
+	final static int SERIALIZATION_BUFFER_SIZE=1024;
+
+	public void sendTargetInformation(TargetInformation info)
+	{
+		if(roborioSocket != null)
+		{
+			ByteBuffer serializedBytes = ByteBuffer.allocate(SERIALIZATION_BUFFER_SIZE);
+			packetWriter.setBuffer(serializedBytes);
+
+			kryo.writeObject(packetWriter, info);
+
+			packetWriter.flush();
+
+			DatagramPacket packet = new DatagramPacket(serializedBytes.array(), SERIALIZATION_BUFFER_SIZE);
+
+			try
+			{
+				roborioSocket.send(packet);
+			}
+			catch (IOException e)
+			{
+				Toast.makeText(this, "Failed to send target information to RoboRIO: " + e.getMessage(), Toast.LENGTH_LONG).show();
+				e.printStackTrace();
+			}
+		}
+	}
 }

@@ -17,4 +17,12 @@ public abstract class NarwhalVisionFragment extends Fragment
 	 * We can't load OpenCV in the fragments because it somehow breaks the OpenCV installer
 	 */
 	public void onOpenCVLoaded() {}
+
+	/**
+	 * Call this at the end of onCreateView() to make the OpenCV loading process work
+	 */
+	public void notifyLoadingComplete()
+	{
+		((NarwhalVisionActivity)getActivity()).onFragmentLoaded(this);
+	}
 }

@@ -125,7 +125,9 @@ public class SettingsFragment extends NarwhalVisionFragment implements TextWatch
 		editMaxH.addTextChangedListener(this);
 		editMaxS.addTextChangedListener(this);
 		editMaxV.addTextChangedListener(this);
-		
+
+		notifyLoadingComplete();
+
 		return content;
 	}
 
