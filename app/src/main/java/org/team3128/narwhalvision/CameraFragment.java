@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
 import android.widget.Switch;
 
 import org.opencv.android.CameraBridgeViewBase;
@@ -32,6 +33,8 @@ public class CameraFragment extends NarwhalVisionFragment implements CameraBridg
 	private JavaCameraView mOpenCvCameraView;
 
 	private Switch colorFilterSwitch;
+
+	private CheckBox roborioConnectionIndicator;
 
 	private TowerTrackerPipeline pipeline;
 
@@ -57,7 +60,12 @@ public class CameraFragment extends NarwhalVisionFragment implements CameraBridg
 		mOpenCvCameraView.setCvCameraViewListener(this);
 
 		colorFilterSwitch = (Switch) content.findViewById(R.id.colorFilterSwitch);
+		roborioConnectionIndicator = (CheckBox) content.findViewById(R.id.roborioResolvedIndicator);
 
+		if(((NarwhalVisionActivity)getActivity()).hasFoundRIO())
+		{
+			onRIOConnected();
+		}
 
 		return content;
 	}
@@ -134,4 +142,19 @@ public class CameraFragment extends NarwhalVisionFragment implements CameraBridg
 		mOpenCvCameraView.enableView();
 	}
 
+	/**
+	  Called to update the UI to show that the robot has been found
+	 */
+	public void onRIOConnected()
+	{
+		getActivity().runOnUiThread(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				roborioConnectionIndicator.setChecked(true);
+				roborioConnectionIndicator.setText("RIO Found");
+			}
+		});
+	}
 }

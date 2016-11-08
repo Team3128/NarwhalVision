@@ -20,6 +20,8 @@ public class TargetInformation
 	float boundingRectRight;
 	float boundingRectBottom;
 
+	//NOTE: these are pixel coordinates, so the origin is in the top left of the image
+
 	float boundingRectHeight, boundingRectWidth;
 
 	float boundingRectCenterX, boundingRectCenterY;
@@ -36,19 +38,27 @@ public class TargetInformation
 	public TargetInformation(Rect target, int imageWidth, int imageHeight, float horizontalFOV, float verticalFOV)
 	{
 		area = (float) target.area();
-		boundingRectLeft = (float) target.tl().x;
-		boundingRectBottom = (float) target.br().y;
-		boundingRectTop = (float) target.tl().y;
-		boundingRectRight = (float) target.br().x;
 
-		boundingRectHeight = boundingRectTop - boundingRectBottom;
+		//NOTE: the phone is sidweways, so horizontal and vertical are flipped
+
+		boundingRectTop = (float) target.tl().x;
+		boundingRectRight = (float) target.br().y;
+		boundingRectLeft = (float) target.tl().y;
+		boundingRectBottom = (float) target.br().x;
+
+		this.imageHeight = imageWidth;
+		this.imageWidth = imageHeight;
+
+		this.verticalFOV = horizontalFOV;
+		this.horizontalFOV = verticalFOV;
+
+		//END NUTSO BACKWARDS FLIPPED ZONE
+
+		boundingRectCenterX = (boundingRectLeft + boundingRectRight) / 2.0F;
+		boundingRectCenterY = (boundingRectTop + boundingRectBottom) / 2.0f;
+
+		boundingRectHeight = boundingRectBottom - boundingRectTop;
 		boundingRectWidth = boundingRectRight - boundingRectLeft;
-
-		this.imageWidth = imageWidth;
-		this.imageHeight = imageHeight;
-
-		this.horizontalFOV = horizontalFOV;
-		this.verticalFOV = verticalFOV;
 	}
 
 	/**

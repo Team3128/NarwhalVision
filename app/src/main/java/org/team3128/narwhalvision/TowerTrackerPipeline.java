@@ -106,7 +106,7 @@ public class TowerTrackerPipeline
 			Rect boundingBox = Imgproc.boundingRect(matOfPoint);
 
 			double aspect = ((double)boundingBox.width) / ((double)boundingBox.height);
-			double aspectQuotient = aspect / Settings.getTargetAspectRatio();
+			double aspectQuotient = aspect / (Settings.getTargetAspectRatio());
 
 			if((boundingBox.area() * 100)/ (frame.width() * frame.height()) < Settings.minArea)
 			{
@@ -153,7 +153,7 @@ public class TowerTrackerPipeline
 				aspectQuotient = 1/aspectQuotient;
 			}
 
-			double score = area / (Math.abs(solidityPercent - Settings.targetSolidity) * aspectQuotient);
+			double score = area / (100 * Math.abs(solidityPercent - Settings.targetSolidity) * aspectQuotient);
 
 			if(bestCountour == null || score > bestScore)
 			{

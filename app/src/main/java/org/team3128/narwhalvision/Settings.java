@@ -86,6 +86,7 @@ public class Settings
 	 */
 	static double getTargetAspectRatio()
 	{
-		return targetWidth / ((double)targetHeight);
+		//the phone is sideways, so horizontal and vertical are flipped
+		return  targetHeight / ((double)targetWidth);
 	}
 }

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.net.nsd.NsdManager;
 import android.net.nsd.NsdServiceInfo;
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -11,7 +12,6 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.WindowManager;
-import android.widget.Toast;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.ByteBufferOutput;
@@ -25,6 +25,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 
 public class NarwhalVisionActivity extends FragmentActivity
@@ -50,7 +51,7 @@ public class NarwhalVisionActivity extends FragmentActivity
 	private NsdManager mdnsDiscoverer;
 	private RoborioDiscoveryListener roborioDiscoveryListener;
 	private RoborioResolveListener roborioResolveListener;
-	private final static String ROBORIO_SERVICE_TYPE="_narwhalvision._udp.";
+	private final static String ROBORIO_SERVICE_TYPE="_http._tcp.";
 
 	//------------------------------------
 	private Kryo kryo;
@@ -80,7 +81,7 @@ public class NarwhalVisionActivity extends FragmentActivity
 		public void onServiceFound(NsdServiceInfo serviceInfo)
 		{
 			Log.i(TAG, "Found service: " + serviceInfo.toString());
-			if(serviceInfo.getServiceName().contains("roborio-3128-frc"))
+			if(serviceInfo.getServiceName().contains("roboRIO-3128-FRC"))
 			{
 				Log.i(TAG, "It's the RoboRIO mDNS!  Hooray!");
 				mdnsDiscoverer.resolveService(serviceInfo, roborioResolveListener);
@@ -127,7 +128,7 @@ public class NarwhalVisionActivity extends FragmentActivity
 	private void onGetNewRoborioAddress(InetAddress roborioAddress)
 	{
 		//create it if it hasn't been created yet
-		if(roborioSocket == null)
+		if (roborioSocket == null)
 		{
 			try
 			{
@@ -140,9 +141,14 @@ public class NarwhalVisionActivity extends FragmentActivity
 			}
 		}
 
-		if(roborioSocket.getInetAddress() != roborioAddress) //check to make sure it isn't the same one
+		if (roborioSocket.getInetAddress() != roborioAddress) //check to make sure it isn't the same one
 		{
 			roborioSocket.connect(roborioAddress, NARWHAL_VISION_PORT);
+
+			if (pages[0] != null && currentPage == 0)
+			{
+				((CameraFragment) pages[0]).onRIOConnected();
+			}
 		}
 	}
 
@@ -259,12 +265,26 @@ public class NarwhalVisionActivity extends FragmentActivity
 		roborioResolveListener = new RoborioResolveListener();
 		mdnsDiscoverer.discoverServices(ROBORIO_SERVICE_TYPE, NsdManager.PROTOCOL_DNS_SD, roborioDiscoveryListener);
 
+		StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+		StrictMode.setThreadPolicy(policy);
+
+		try
+		{
+			onGetNewRoborioAddress(InetAddress.getByName("192.168.1.162"));
+		}
+		catch (UnknownHostException e)
+		{
+			e.printStackTrace();
+		}
+
 		//-------------------------------------------------------------------
 		// Set up serializer
 		//-------------------------------------------------------------------
 
 		kryo = new Kryo();
 		kryo.register(TargetInformation.class);
+
+		packetWriter = new ByteBufferOutput();
 	}
 
 	@Override
@@ -331,6 +351,11 @@ public class NarwhalVisionActivity extends FragmentActivity
 		}
 	}
 
+	public boolean hasFoundRIO()
+	{
+		return roborioSocket != null && roborioSocket.isConnected();
+	}
+
 	// static buffer used to hold serialized objects
 	// no, as far as I can tell, there's no way to not have a fixed size buffer
 	final static int SERIALIZATION_BUFFER_SIZE=1024;
@@ -354,7 +379,7 @@ public class NarwhalVisionActivity extends FragmentActivity
 			}
 			catch (IOException e)
 			{
-				Toast.makeText(this, "Failed to send target information to RoboRIO: " + e.getMessage(), Toast.LENGTH_LONG).show();
+				Log.e(TAG, "Failed to send target information to RoboRIO: " + e.getMessage());
 				e.printStackTrace();
 			}
 		}
