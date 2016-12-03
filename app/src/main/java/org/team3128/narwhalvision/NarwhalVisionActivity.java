@@ -4,7 +4,6 @@ import android.content.Context;
 import android.net.nsd.NsdManager;
 import android.net.nsd.NsdServiceInfo;
 import android.os.Bundle;
-import android.os.StrictMode;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -25,7 +24,6 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
-import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 
 public class NarwhalVisionActivity extends FragmentActivity
@@ -265,17 +263,17 @@ public class NarwhalVisionActivity extends FragmentActivity
 		roborioResolveListener = new RoborioResolveListener();
 		mdnsDiscoverer.discoverServices(ROBORIO_SERVICE_TYPE, NsdManager.PROTOCOL_DNS_SD, roborioDiscoveryListener);
 
-		StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-		StrictMode.setThreadPolicy(policy);
-
-		try
-		{
-			onGetNewRoborioAddress(InetAddress.getByName("192.168.1.162"));
-		}
-		catch (UnknownHostException e)
-		{
-			e.printStackTrace();
-		}
+//		StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+//		StrictMode.setThreadPolicy(policy);
+//
+//		try
+//		{
+//			onGetNewRoborioAddress(InetAddress.getByName("192.168.1.162"));
+//		}
+//		catch (UnknownHostException e)
+//		{
+//			e.printStackTrace();
+//		}
 
 		//-------------------------------------------------------------------
 		// Set up serializer

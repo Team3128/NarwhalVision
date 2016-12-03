@@ -7,6 +7,7 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -152,11 +153,16 @@ public class ImageFileFragment extends NarwhalVisionFragment
 
 		Imgproc.cvtColor(testImage, rgbaImg, Imgproc.COLOR_BGRA2RGBA);
 
-		Mat result = pipeline.processImage(rgbaImg, colorThresholdToggle.isChecked()).first;
+		Pair<Mat, TargetInformation> results = pipeline.processImage(rgbaImg, colorThresholdToggle.isChecked());
+
+		Mat resultImage = results.first;
+		TargetInformation targetInformation = results.second;
 
 		//convert Mat to Bitmap
-		Bitmap resultBitmap = Bitmap.createBitmap(result.cols(), result.rows(), Bitmap.Config.ARGB_8888);
-		Utils.matToBitmap(result, resultBitmap);
+		Bitmap resultBitmap = Bitmap.createBitmap(resultImage.cols(), resultImage.rows(), Bitmap.Config.ARGB_8888);
+		Utils.matToBitmap(resultImage, resultBitmap);
+
+		Log.v(TAG, "Target: " + targetInformation);
 
 		resultView.setImageBitmap(resultBitmap);
 	}

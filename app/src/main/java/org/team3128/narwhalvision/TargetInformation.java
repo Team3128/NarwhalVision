@@ -12,23 +12,23 @@ import org.opencv.core.Rect;
 public class TargetInformation
 {
 	// NOTE: these are kept public to give the serializer an easier time
-	// we also use floats so we don't send an unneccessary anount of precision
+	// we also use floats so we don't send an unneccessary amount of precision
 
-	float area;
-	float boundingRectLeft;
-	float boundingRectTop;
-	float boundingRectRight;
-	float boundingRectBottom;
+	public float area;
+	public float boundingRectLeft;
+	public float boundingRectTop;
+	public float boundingRectRight;
+	public float boundingRectBottom;
 
 	//NOTE: these are pixel coordinates, so the origin is in the top left of the image
 
-	float boundingRectHeight, boundingRectWidth;
+	public float boundingRectHeight, boundingRectWidth;
 
-	float boundingRectCenterX, boundingRectCenterY;
+	public float boundingRectCenterX, boundingRectCenterY;
 
-	int imageWidth, imageHeight;
+	public int imageWidth, imageHeight;
 
-	float horizontalFOV, verticalFOV;
+	public float horizontalFOV, verticalFOV;
 
 	/**
 	 * Populate from image and index in image
@@ -39,20 +39,16 @@ public class TargetInformation
 	{
 		area = (float) target.area();
 
-		//NOTE: the phone is sidweways, so horizontal and vertical are flipped
+		boundingRectTop = (float) target.tl().y;
+		boundingRectRight = (float) target.br().x;
+		boundingRectLeft = (float) target.tl().x;
+		boundingRectBottom = (float) target.br().y;
 
-		boundingRectTop = (float) target.tl().x;
-		boundingRectRight = (float) target.br().y;
-		boundingRectLeft = (float) target.tl().y;
-		boundingRectBottom = (float) target.br().x;
+		this.imageWidth = imageWidth;
+		this.imageHeight = imageHeight;
 
-		this.imageHeight = imageWidth;
-		this.imageWidth = imageHeight;
-
-		this.verticalFOV = horizontalFOV;
-		this.horizontalFOV = verticalFOV;
-
-		//END NUTSO BACKWARDS FLIPPED ZONE
+		this.verticalFOV = verticalFOV;
+		this.horizontalFOV = horizontalFOV;
 
 		boundingRectCenterX = (boundingRectLeft + boundingRectRight) / 2.0F;
 		boundingRectCenterY = (boundingRectTop + boundingRectBottom) / 2.0f;
@@ -125,8 +121,14 @@ public class TargetInformation
 	 */
 	public float getVerticalAngle()
 	{
-		float distanceFromCenter = boundingRectCenterY - imageHeight / 2.0F;
+		float distanceFromCenter = -1 * (boundingRectCenterY - imageHeight / 2.0F);
 
 		return (float) Math.toDegrees(Math.atan(distanceFromCenter * Math.tan(Math.toRadians(horizontalFOV)) / imageWidth));
+	}
+
+	@Override
+	public String toString()
+	{
+		return "TargetInformation: center: (" + boundingRectCenterX + ", " + boundingRectCenterY + "), bounding box: (" + boundingRectWidth + ", " + boundingRectHeight + "), image size: (" + imageWidth + ", " + imageHeight + "), horizontal angle offset: " + getHorizontalAngle() + " deg, vertical angle offset: " + getVerticalAngle();
 	}
 }

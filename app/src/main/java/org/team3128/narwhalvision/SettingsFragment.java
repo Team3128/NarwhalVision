@@ -1,7 +1,6 @@
 package org.team3128.narwhalvision;
 
 
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
@@ -69,7 +68,7 @@ public class SettingsFragment extends NarwhalVisionFragment implements TextWatch
 	@Override
 	public void onSwapIn()
 	{
-		//just in case something else changed a setting
+		//in case something else changed a setting
 		populateFromSettings();
 	}
 
@@ -187,17 +186,7 @@ public class SettingsFragment extends NarwhalVisionFragment implements TextWatch
 
 	}
 
-	/**
-	 * wrapper around Android's hsv conversion method that deals with the weird arguments
-	 * @param h
-	 * @param s
-	 * @param v
-	 * @return
-	 */
-	public int colorFromHSV(int h, int s, int v)
-	{
-		return Color.HSVToColor(new float[]{h * 360F / 255F, s/255F, v/255F});
-	}
+
 
 	@Override
 	public void afterTextChanged(Editable s)
@@ -212,11 +201,11 @@ public class SettingsFragment extends NarwhalVisionFragment implements TextWatch
 	private void updateColorViews()
 	{
 		//update color previews
-		minHBlock.setBackgroundColor(colorFromHSV(Settings.lowH, 255, 255));
-		maxHBlock.setBackgroundColor(colorFromHSV(Settings.highH, 255, 255));
-		minSBlock.setBackgroundColor(colorFromHSV(Settings.lowH, Settings.lowS, 255));
-		maxSBlock.setBackgroundColor(colorFromHSV(Settings.highH, Settings.highS, 255));
-		minVBlock.setBackgroundColor(colorFromHSV(0, 0, Settings.lowV));
-		maxVBlock.setBackgroundColor(colorFromHSV(0, 0, Settings.highV));
+		minHBlock.setBackgroundColor(Utils.androidColorFromHSV(Settings.lowH, 255, 255));
+		maxHBlock.setBackgroundColor(Utils.androidColorFromHSV(Settings.highH, 255, 255));
+		minSBlock.setBackgroundColor(Utils.androidColorFromHSV(Settings.lowH, Settings.lowS, 255));
+		maxSBlock.setBackgroundColor(Utils.androidColorFromHSV(Settings.highH, Settings.highS, 255));
+		minVBlock.setBackgroundColor(Utils.androidColorFromHSV(0, 0, Settings.lowV));
+		maxVBlock.setBackgroundColor(Utils.androidColorFromHSV(0, 0, Settings.highV));
 	}
 }
