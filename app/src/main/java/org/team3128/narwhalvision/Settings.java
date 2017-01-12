@@ -16,6 +16,9 @@ public class Settings
 	//one ratio saved as two parts for the settings screen
 	public static int targetWidth, targetHeight;
 
+	// Maximum number of targets to find
+	public static int numTargets;
+
 	//path to last image used in image test screen
 	//null if unselected
 	public static String testImagePath;
@@ -50,6 +53,8 @@ public class Settings
 
 		testImagePath = prefs.getString("testImagePath", null);
 
+		minArea = prefs.getInt("numTargets", 1);
+
 		minArea = prefs.getInt("minArea", 50);
 		targetSolidity = prefs.getInt("targetSolidity", 50);
 		targetHeight = prefs.getInt("targetHeight", 1);
@@ -72,6 +77,8 @@ public class Settings
 		editor.putInt("highV", highV);
 
 		editor.putString("testImagePath", testImagePath);
+
+		editor.putInt("numTargets", numTargets);
 
 		editor.putInt("minArea", minArea);
 		editor.putInt("targetSolidity", targetSolidity);

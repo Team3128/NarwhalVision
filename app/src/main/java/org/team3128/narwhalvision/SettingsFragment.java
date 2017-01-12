@@ -34,6 +34,7 @@ public class SettingsFragment extends NarwhalVisionFragment implements TextWatch
 	EditText editSolidity;
 	EditText editHeight;
 	EditText editWidth;
+	EditText editNumTargets;
 
 	View minHBlock;
 	View maxHBlock;
@@ -91,6 +92,7 @@ public class SettingsFragment extends NarwhalVisionFragment implements TextWatch
 		editSolidity = (EditText) content.findViewById(R.id.editSolidity);
 		editWidth = (EditText) content.findViewById(R.id.editWidth);
 		editHeight = (EditText) content.findViewById(R.id.editHeight);
+		editNumTargets = (EditText) content.findViewById(R.id.editNumTargets);
 
 		maxHBlock = content.findViewById(R.id.maxHView);
 		maxSBlock = content.findViewById(R.id.maxSView);
@@ -144,13 +146,26 @@ public class SettingsFragment extends NarwhalVisionFragment implements TextWatch
 		editSolidity.setText(Integer.toString(Settings.targetSolidity));
 		editHeight.setText(Integer.toString(Settings.targetHeight));
 		editWidth.setText(Integer.toString(Settings.targetWidth));
+		editNumTargets.setText(Integer.toString(Settings.numTargets));
 
 	}
 
 	private void loadEnteredValues()
 	{
+		//check for blank fields, and return if we find any
+		EditText[] requiredPopulatedFields = {editMinH, editMinS, editMinV, editMaxH, editMaxS, editMaxV, editArea, editSolidity, editHeight, editWidth, editNumTargets};
+
+		for(EditText field : requiredPopulatedFields)
+		{
+			if(field.getText().length() == 0)
+			{
+				return;
+			}
+		}
+
 		try
 		{
+
 			//TODO: don't parse blank fields
 
 			Settings.lowH = Integer.parseInt(editMinH.getText().toString());
@@ -165,6 +180,7 @@ public class SettingsFragment extends NarwhalVisionFragment implements TextWatch
 			Settings.targetSolidity = Integer.parseInt(editSolidity.getText().toString());
 			Settings.targetWidth = Integer.parseInt(editWidth.getText().toString());
 			Settings.targetHeight = Integer.parseInt(editHeight.getText().toString());
+			Settings.numTargets = Integer.parseInt(editNumTargets.getText().toString());
 		}
 		catch(NumberFormatException ex)
 		{

@@ -172,12 +172,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="% of image area"
+            android:text="Size: "
             tools:text="Size: "/>
         <EditText
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:inputType="number|numberSigned"
+            android:inputType="number|numberDecimal"
             android:ems="3"
             android:id="@+id/editArea"
             android:textColor="#000000"
@@ -260,6 +260,29 @@
             android:ems="4"
             android:id="@+id/editHeight"
             android:hint="Height"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:id="@+id/targetNumberControls"
+        android:layout_below="@+id/aspectRatioControls"
+        android:layout_alignParentStart="true">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="Number of Targets:"
+            android:id="@+id/numTargetsText"/>
+
+        <EditText
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:inputType="numberSigned"
+            android:ems="2"
+            android:id="@+id/editNumTargets"
+            android:hint="#"/>
     </LinearLayout>
 
 

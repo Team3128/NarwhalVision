@@ -30,13 +30,18 @@ public class TargetInformation
 
 	public float horizontalFOV, verticalFOV;
 
+	// position in the list of targets found in this round of searching.  A lower number means that this target matched the criteria better. The best target of each round has index 1.
+	public int targetRanking;
+
 	/**
 	 * Populate from image and index in image
 	 *
 	 * NOTE: we use the width of the target because we are looking up at the target from the ground so height will be parallax-distorted.
 	 */
-	public TargetInformation(Rect target, int imageWidth, int imageHeight, float horizontalFOV, float verticalFOV)
+	public TargetInformation(Rect target, int imageWidth, int imageHeight, float horizontalFOV, float verticalFOV, int targetRanking)
 	{
+		this.targetRanking = targetRanking;
+
 		area = (float) target.area();
 
 		boundingRectTop = (float) target.tl().y;

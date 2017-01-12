@@ -24,6 +24,7 @@ import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
 import java.io.File;
+import java.util.ArrayList;
 
 /**
  * Viewer which runs images through the pipeline instead of the camera data.
@@ -120,12 +121,6 @@ public class ImageFileFragment extends NarwhalVisionFragment
 		{
 			refreshImage();
 		}
-		else
-		{
-			//get a new file path
-			invokeImageChooser();
-			refreshImage();
-		}
 	}
 
 	/**
@@ -153,16 +148,15 @@ public class ImageFileFragment extends NarwhalVisionFragment
 
 		Imgproc.cvtColor(testImage, rgbaImg, Imgproc.COLOR_BGRA2RGBA);
 
-		Pair<Mat, TargetInformation> results = pipeline.processImage(rgbaImg, colorThresholdToggle.isChecked());
+		Pair<Mat, ArrayList<TargetInformation>> results = pipeline.processImage(rgbaImg, colorThresholdToggle.isChecked());
 
 		Mat resultImage = results.first;
-		TargetInformation targetInformation = results.second;
 
 		//convert Mat to Bitmap
 		Bitmap resultBitmap = Bitmap.createBitmap(resultImage.cols(), resultImage.rows(), Bitmap.Config.ARGB_8888);
 		Utils.matToBitmap(resultImage, resultBitmap);
 
-		Log.v(TAG, "Target: " + targetInformation);
+		Log.v(TAG, "Targets: " + String.valueOf(results.second));
 
 		resultView.setImageBitmap(resultBitmap);
 	}

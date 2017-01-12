@@ -4,6 +4,7 @@ import android.content.Context;
 import android.net.nsd.NsdManager;
 import android.net.nsd.NsdServiceInfo;
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -24,7 +25,9 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 
 public class NarwhalVisionActivity extends FragmentActivity
 {
@@ -263,17 +266,17 @@ public class NarwhalVisionActivity extends FragmentActivity
 		roborioResolveListener = new RoborioResolveListener();
 		mdnsDiscoverer.discoverServices(ROBORIO_SERVICE_TYPE, NsdManager.PROTOCOL_DNS_SD, roborioDiscoveryListener);
 
-//		StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-//		StrictMode.setThreadPolicy(policy);
-//
-//		try
-//		{
-//			onGetNewRoborioAddress(InetAddress.getByName("192.168.1.162"));
-//		}
-//		catch (UnknownHostException e)
-//		{
-//			e.printStackTrace();
-//		}
+		StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+		StrictMode.setThreadPolicy(policy);
+
+		try
+		{
+			onGetNewRoborioAddress(InetAddress.getByName("192.168.1.162"));
+		}
+		catch (UnknownHostException e)
+		{
+			e.printStackTrace();
+		}
 
 		//-------------------------------------------------------------------
 		// Set up serializer
@@ -358,14 +361,17 @@ public class NarwhalVisionActivity extends FragmentActivity
 	// no, as far as I can tell, there's no way to not have a fixed size buffer
 	final static int SERIALIZATION_BUFFER_SIZE=1024;
 
-	public void sendTargetInformation(TargetInformation info)
+	public void sendTargetInformation(ArrayList<TargetInformation> infoList)
 	{
 		if(roborioSocket != null)
 		{
 			ByteBuffer serializedBytes = ByteBuffer.allocate(SERIALIZATION_BUFFER_SIZE);
 			packetWriter.setBuffer(serializedBytes);
 
-			kryo.writeObject(packetWriter, info);
+			for(TargetInformation info : infoList)
+			{
+				kryo.writeObject(packetWriter, info);
+			}
 
 			packetWriter.flush();
 

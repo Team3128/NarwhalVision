@@ -20,7 +20,7 @@ import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.JavaCameraView;
 import org.opencv.core.Mat;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -115,9 +115,9 @@ public class CameraFragment extends NarwhalVisionFragment implements CameraBridg
 		if(getContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH))
 		{
 			Log.i(TAG, "Turning on flashlight");
-			//cameraParams.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
+			cameraParams.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
 
-			Log.i(TAG, "min exposure compensation: " + "");
+//			Log.i(TAG, "min exposure compensation: " + "");
 //			cameraParams.setExposureCompensation(-30);
 //			cameraParams.setAutoExposureLock(true);
 //
@@ -200,44 +200,42 @@ public class CameraFragment extends NarwhalVisionFragment implements CameraBridg
 	{
 		Mat rgbImg = inputFrame.rgba();
 
-
-
 		//handle touch selection
-		if(userTouchedPixel)
-		{
-			Pair<Integer, Integer> frameCoordinates = screenCoordinates2FrameCoordinates(touchX, touchY);
-
-			if (frameCoordinates != null)
-			{
-
-				Log.d(TAG, "User touched pixel (" + touchX + ", " + touchY + "), on the frame that's (" + frameCoordinates.first + " ," + frameCoordinates.second + ")");
-
-				//convert screen coordinates to frame coordinates
-				userTouchedPixel = false;
-				double[] rgbColors = rgbImg.get(frameCoordinates.first, frameCoordinates.second);
-				if (rgbColors != null)
-				{
-
-					int[] rgbColorsBytes = new int[]{(int) rgbColors[0], (int) rgbColors[1], (int) rgbColors[2]};
-
-					final int touchSelectionRadius = 20;
-					int[] hsvColors = Utils.androidColorToHSV(Utils.rgbToAndroidColor(rgbColorsBytes));
-
-					Log.d(TAG, "User selected color " + Arrays.toString(hsvColors));
-
-					Settings.highH = Utils.clampColor(hsvColors[0] + touchSelectionRadius);
-					Settings.highS = Utils.clampColor(hsvColors[1] + touchSelectionRadius);
-					Settings.highV = Utils.clampColor(hsvColors[2] + touchSelectionRadius);
-
-					Settings.lowH = Utils.clampColor(hsvColors[0] - touchSelectionRadius);
-					Settings.lowS = Utils.clampColor(hsvColors[1] - touchSelectionRadius);
-					Settings.lowV = Utils.clampColor(hsvColors[2] - touchSelectionRadius);
-
-					pipeline.loadSettings();
-				}
-			}
-		}
-		Pair<Mat, TargetInformation> result = pipeline.processImage(rgbImg, colorFilterSwitch.isChecked());
+//		if(userTouchedPixel)
+//		{
+//			Pair<Integer, Integer> frameCoordinates = screenCoordinates2FrameCoordinates(touchX, touchY);
+//
+//			if (frameCoordinates != null)
+//			{
+//
+//				Log.d(TAG, "User touched pixel (" + touchX + ", " + touchY + "), on the frame that's (" + frameCoordinates.first + " ," + frameCoordinates.second + ")");
+//
+//				//convert screen coordinates to frame coordinates
+//				userTouchedPixel = false;
+//				double[] rgbColors = rgbImg.get(frameCoordinates.first, frameCoordinates.second);
+//				if (rgbColors != null)
+//				{
+//
+//					int[] rgbColorsBytes = new int[]{(int) rgbColors[0], (int) rgbColors[1], (int) rgbColors[2]};
+//
+//					final int touchSelectionRadius = 20;
+//					int[] hsvColors = Utils.androidColorToHSV(Utils.rgbToAndroidColor(rgbColorsBytes));
+//
+//					Log.d(TAG, "User selected color " + Arrays.toString(hsvColors));
+//
+//					Settings.highH = Utils.clampColor(hsvColors[0] + touchSelectionRadius);
+//					Settings.highS = Utils.clampColor(hsvColors[1] + touchSelectionRadius);
+//					Settings.highV = Utils.clampColor(hsvColors[2] + touchSelectionRadius);
+//
+//					Settings.lowH = Utils.clampColor(hsvColors[0] - touchSelectionRadius);
+//					Settings.lowS = Utils.clampColor(hsvColors[1] - touchSelectionRadius);
+//					Settings.lowV = Utils.clampColor(hsvColors[2] - touchSelectionRadius);
+//
+//					pipeline.loadSettings();
+//				}
+//			}
+//		}
+		Pair<Mat, ArrayList<TargetInformation>> result = pipeline.processImage(rgbImg, colorFilterSwitch.isChecked());
 
 		if(result.second != null)
 		{

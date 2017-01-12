@@ -11,6 +11,7 @@ import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 
 /**
@@ -34,6 +35,96 @@ public class TowerTrackerPipeline
 
 	//used for constructing TargetInformation classes
 	final private float horizontalFOV, verticalFOV;
+
+	private class TargetData implements Comparable<TargetData>
+	{
+		Mat sourceFrame;
+		Rect boundingBox;
+
+		// area of the arbitrarily shaped surface that makes up the target
+		double contourArea;
+
+		// area of the bounding box around the target
+		double boundingBoxArea;
+
+		//aspect ratio (width per height)
+		double aspect;
+
+		//factor between this contour's aspect ratio and the target ratio
+		double aspectQuotient;
+
+		// ratio between 1 and 0 of how solid this contour is
+		double solidity;
+
+		// how far away from the target aspect ratio a countour can be before it is disqualified
+		final static double ASPECT_RATIO_FUZZ_FACTOR = 3;
+
+		// number representing how well this contour mateches the targeting criteria
+		private double score;
+
+		public TargetData(Mat sourceFrame, MatOfPoint contour)
+		{
+			this.sourceFrame = sourceFrame;
+
+			boundingBox = Imgproc.boundingRect(contour);
+
+			aspect = ((double)boundingBox.width) / ((double)boundingBox.height);
+			aspectQuotient = aspect / (Settings.getTargetAspectRatio());
+
+			contourArea = Imgproc.contourArea(contour);
+			boundingBoxArea = boundingBox.area();
+
+			solidity = boundingBoxArea / contourArea;
+
+			// now we calculate the score
+			//for now, we just rank by area and solidity (the goal is NOT very solid)
+
+			double aspectQuotient = aspect / Settings.getTargetAspectRatio();
+
+			//if the target aspect ratio was the larger one, flip the fraction
+			if(aspectQuotient < 1)
+			{
+				aspectQuotient = 1/aspectQuotient;
+			}
+
+			score =  contourArea / (1000 * Math.abs(100 * solidity - Settings.targetSolidity) * aspectQuotient);
+		}
+
+		/**
+		 *
+		 * @return true if this contour could possibly be a target
+		 */
+		boolean isPotentialTarget()
+		{
+			// too small?
+			if((boundingBox.area() * 100)/ (sourceFrame.width() * sourceFrame.height()) < Settings.minArea)
+			{
+				return false;
+			}
+
+			//is the aspect ratio too far off?
+			if(aspectQuotient <= 1/ASPECT_RATIO_FUZZ_FACTOR || aspectQuotient >= ASPECT_RATIO_FUZZ_FACTOR)
+			{
+				return false;
+			}
+
+			return true;
+		}
+
+		/**
+		 * Draw this contour's bounding box on the source frame
+		 */
+		void drawBoundingBox(Scalar color)
+		{
+			Imgproc.rectangle(sourceFrame, boundingBox.br(), boundingBox.tl(), color);
+		}
+
+		@Override
+		public int compareTo(TargetData another)
+		{
+			return (int)(score - another.score);
+		}
+	}
 
 	/*
 	Only construct this class after OpenCV is loaded.
@@ -75,7 +166,7 @@ public class TowerTrackerPipeline
 	 *
 	 * @return What should be displayed on the phone screen, and information about the target if one was found.
 	 */
-	public Pair<Mat, TargetInformation> processImage(Mat frame, boolean showColorFilter)
+	public Pair<Mat, ArrayList<TargetInformation>> processImage(Mat frame, boolean showColorFilter)
 	{
 		//RGBA to RGB
 		Imgproc.cvtColor(frame, rgbImg, Imgproc.COLOR_RGBA2RGB);
@@ -98,86 +189,42 @@ public class TowerTrackerPipeline
 
 		Log.i(TAG, "Found contours: " + foundContours.size());
 
+		ArrayList<TargetData> candidateContours = new ArrayList<>();
+
 		// make sure the contours that are detected are at least 20x20
 		// pixels with an area of 400 and an aspect ratio greater then 1
 		for(Iterator<MatOfPoint> matPointIter = foundContours.iterator(); matPointIter.hasNext();)
 		{
 			MatOfPoint matOfPoint = matPointIter.next();
-			Rect boundingBox = Imgproc.boundingRect(matOfPoint);
 
-			double aspect = ((double)boundingBox.width) / ((double)boundingBox.height);
-			double aspectQuotient = aspect / (Settings.getTargetAspectRatio());
-
-			if((boundingBox.area() * 100)/ (frame.width() * frame.height()) < Settings.minArea)
+			TargetData contourData = new TargetData(frame, matOfPoint);
+			if(contourData.isPotentialTarget())
 			{
-				matPointIter.remove();
-				continue;
+				candidateContours.add(contourData);
+				contourData.drawBoundingBox(RED);
 			}
-
-			//if the aspect ratios are within a factor of 4 of each other...
-			if(aspectQuotient <= .25 || aspectQuotient >= 4)
-			{
-				matPointIter.remove();
-				continue;
-			}
-
-			// Draw rectangles on the image to show countours
-			Imgproc.rectangle(frame, boundingBox.br(), boundingBox.tl(), RED);
 		}
 
-		if(foundContours.isEmpty())
+		ArrayList<TargetInformation> foundTargetInformation = new ArrayList<>();
+
+		if(!candidateContours.isEmpty())
 		{
-			return new Pair<>(frame, null);
-		}
+			//now that we've removed the riff-raff, find the best contour
+			Collections.sort(candidateContours);
 
-		//now that we've removed the riff-raff, find the best contour
-		MatOfPoint bestCountour = null;
-		Rect winnerBoundingBox = null;
-		double bestScore = 0;
-		double winnerSolidity = 0;
-
-		for(MatOfPoint matOfPoint : foundContours)
-		{
-			//for now, we just rank by area and solidity (the goal is NOT very solid)
-			Rect boundingBox = Imgproc.boundingRect(matOfPoint);
-			double area = Imgproc.contourArea(matOfPoint);
-
-			double solidityPercent = (boundingBox.width * boundingBox.height * 100) / area;
-
-			double aspect = ((double)boundingBox.width) / ((double)boundingBox.height);
-			double aspectQuotient = aspect / Settings.getTargetAspectRatio();
-
-			//if the target aspect ratio was the larger one, flip the fraction
-			if(aspectQuotient < 1)
+			for(int index = 1; index < Math.min(candidateContours.size(), Settings.numTargets); ++index)
 			{
-				aspectQuotient = 1/aspectQuotient;
+				TargetData selectedContour = candidateContours.get(index);
+
+				selectedContour.drawBoundingBox(GREEN);
+
+				TargetInformation targetInfo = new TargetInformation(selectedContour.boundingBox, frame.width(), frame.height(), horizontalFOV, verticalFOV, index);
+				foundTargetInformation.add(targetInfo);
+
 			}
-
-			double score = area / (100 * Math.abs(solidityPercent - Settings.targetSolidity) * aspectQuotient);
-
-			if(bestCountour == null || score > bestScore)
-			{
-				bestCountour = matOfPoint;
-				bestScore = score;
-				winnerSolidity = solidityPercent;
-				winnerBoundingBox = boundingBox;
-			}
-
 		}
 
-		TargetInformation targetInfo = new TargetInformation(winnerBoundingBox, frame.width(), frame.height(), horizontalFOV, verticalFOV);
-
-
-		//draw a green bounding box
-		if(bestCountour != null)
-		{
-			Imgproc.rectangle(frame, winnerBoundingBox.br(), winnerBoundingBox.tl(), GREEN);
-
-			Log.d(TAG, "Winner solidity: " + winnerSolidity);
-
-		}
-
-		return new Pair<>(frame, targetInfo);
+		return new Pair<>(frame, foundTargetInformation);
 
 
 	}
