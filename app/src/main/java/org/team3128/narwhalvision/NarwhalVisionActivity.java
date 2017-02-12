@@ -4,7 +4,6 @@ import android.content.Context;
 import android.net.nsd.NsdManager;
 import android.net.nsd.NsdServiceInfo;
 import android.os.Bundle;
-import android.os.StrictMode;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -14,6 +13,7 @@ import android.util.Log;
 import android.view.WindowManager;
 
 import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryo.io.ByteBufferInput;
 import com.esotericsoftware.kryo.io.ByteBufferOutput;
 
 import org.opencv.android.BaseLoaderCallback;
@@ -25,9 +25,9 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
-import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.concurrent.BlockingQueue;
 
 public class NarwhalVisionActivity extends FragmentActivity
 {
@@ -56,9 +56,14 @@ public class NarwhalVisionActivity extends FragmentActivity
 
 	//------------------------------------
 	private Kryo kryo;
+	private ByteBufferInput packetReader;
 	private ByteBufferOutput packetWriter;
 
+	private Thread recieveThread;
 
+	//commands need to be run at a time when the vision code is not processing a frame
+	//so we just queue commands to be executed by the main thread
+	private BlockingQueue<PhoneCommand> commandQueue;
 	private DatagramSocket roborioSocket;
 
 	//legal port per the 2016 game manual
@@ -128,6 +133,8 @@ public class NarwhalVisionActivity extends FragmentActivity
 	 */
 	private void onGetNewRoborioAddress(InetAddress roborioAddress)
 	{
+		Log.i(TAG, "Found roborio at " + roborioAddress.toString());
+
 		//create it if it hasn't been created yet
 		if (roborioSocket == null)
 		{
@@ -150,6 +157,34 @@ public class NarwhalVisionActivity extends FragmentActivity
 			{
 				((CameraFragment) pages[0]).onRIOConnected();
 			}
+
+			recieveThread = new Thread(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					Log.d("NV Cmd Reciever", "Starting...");
+
+					byte[] recvBuffer = new byte[SERIALIZATION_BUFFER_SIZE];
+
+					DatagramPacket commandPacket = new DatagramPacket(recvBuffer, SERIALIZATION_BUFFER_SIZE);
+
+					while(!Thread.interrupted())
+					{
+						try
+						{
+							roborioSocket.receive(commandPacket);
+							packetReader.setBuffer(recvBuffer);
+							PhoneCommand command = (PhoneCommand) kryo.readClassAndObject(packetReader);
+							commandQueue.add(command);
+						}
+						catch (IOException e)
+						{
+							e.printStackTrace();
+						}
+					}
+				}
+			});
 		}
 	}
 
@@ -266,25 +301,26 @@ public class NarwhalVisionActivity extends FragmentActivity
 		roborioResolveListener = new RoborioResolveListener();
 		mdnsDiscoverer.discoverServices(ROBORIO_SERVICE_TYPE, NsdManager.PROTOCOL_DNS_SD, roborioDiscoveryListener);
 
-		StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-		StrictMode.setThreadPolicy(policy);
-
-		try
-		{
-			onGetNewRoborioAddress(InetAddress.getByName("192.168.1.162"));
-		}
-		catch (UnknownHostException e)
-		{
-			e.printStackTrace();
-		}
+//		StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+//		StrictMode.setThreadPolicy(policy);
+//
+//		try
+//		{
+//			onGetNewRoborioAddress(InetAddress.getByName("192.168.1.162"));
+//		}
+//		catch (UnknownHostException e)
+//		{
+//			e.printStackTrace();
+//		}
 
 		//-------------------------------------------------------------------
 		// Set up serializer
 		//-------------------------------------------------------------------
 
 		kryo = new Kryo();
-		kryo.register(TargetInformation.class);
-
+		kryo.register(TargetInformation.class, 0);
+		kryo.register(SwitchSlotCommand.class, 1);
+		packetReader = new ByteBufferInput();
 		packetWriter = new ByteBufferOutput();
 	}
 
@@ -306,6 +342,30 @@ public class NarwhalVisionActivity extends FragmentActivity
 			Log.d(TAG, "OpenCV library found inside package. Using it!");
 			mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
 		}
+	}
+
+	/**
+	 * Execute all commands that have been recieved since the last time this function was called.
+	 * Called from the image processing loop.
+	 *
+	 * @return true if the pipeline needs to reload its settings
+	 */
+	public boolean executeCommands()
+	{
+		boolean needReload = false;
+		while(commandQueue.size() > 0)
+		{
+			try
+			{
+				needReload |= commandQueue.take().execute();
+			}
+			catch (InterruptedException e)
+			{
+				e.printStackTrace();
+			}
+		}
+
+		return needReload;
 	}
 
 	boolean notifyFirstFragmentOpenCVLoaded = false;

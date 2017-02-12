@@ -103,7 +103,6 @@ public class ImageFileFragment extends NarwhalVisionFragment
 		if(pipeline != null)
 		{
 			pipeline.loadSettings();
-			refreshImage();
 		}
 	}
 

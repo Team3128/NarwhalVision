@@ -69,7 +69,6 @@ public class TowerTrackerPipeline
 			boundingBox = Imgproc.boundingRect(contour);
 
 			aspect = ((double)boundingBox.width) / ((double)boundingBox.height);
-			aspectQuotient = aspect / (Settings.getTargetAspectRatio());
 
 			contourArea = Imgproc.contourArea(contour);
 			boundingBoxArea = boundingBox.area();
@@ -79,12 +78,12 @@ public class TowerTrackerPipeline
 			// now we calculate the score
 			//for now, we just rank by area and solidity (the goal is NOT very solid)
 
-			double aspectQuotient = aspect / Settings.getTargetAspectRatio();
+			aspectQuotient = aspect / Settings.getTargetAspectRatio();
 
 			//if the target aspect ratio was the larger one, flip the fraction
-			if(aspectQuotient < 1)
+			if(aspectQuotient < 1.0)
 			{
-				aspectQuotient = 1/aspectQuotient;
+				this.aspectQuotient = 1.0/aspectQuotient;
 			}
 
 			score =  contourArea / (1000 * Math.abs(100 * solidity - Settings.targetSolidity) * aspectQuotient);
@@ -103,9 +102,9 @@ public class TowerTrackerPipeline
 			}
 
 			//is the aspect ratio too far off?
-			if(aspectQuotient <= 1/ASPECT_RATIO_FUZZ_FACTOR || aspectQuotient >= ASPECT_RATIO_FUZZ_FACTOR)
+			if(aspectQuotient >= ASPECT_RATIO_FUZZ_FACTOR)
 			{
-				return false;
+			//	return false;
 			}
 
 			return true;
@@ -187,7 +186,7 @@ public class TowerTrackerPipeline
 		foundContours.clear();
 		Imgproc.findContours(filteredImage, foundContours, hierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
 
-		Log.i(TAG, "Found contours: " + foundContours.size());
+		//Log.i(TAG, "Found contours: " + foundContours.size());
 
 		ArrayList<TargetData> candidateContours = new ArrayList<>();
 
@@ -212,9 +211,10 @@ public class TowerTrackerPipeline
 			//now that we've removed the riff-raff, find the best contour
 			Collections.sort(candidateContours);
 
-			for(int index = 1; index < Math.min(candidateContours.size(), Settings.numTargets); ++index)
+			for(int index = 1; index <= Math.min(candidateContours.size(), Settings.numTargets); ++index)
 			{
-				TargetData selectedContour = candidateContours.get(index);
+				TargetData selectedContour = candidateContours.get(index - 1);
+				//Log.d(TAG, "area: " + selectedContour.contourArea + " aspect quotient: " + selectedContour.aspectQuotient);
 
 				selectedContour.drawBoundingBox(GREEN);
 

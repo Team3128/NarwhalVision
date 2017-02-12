@@ -4,7 +4,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:android="http://schemas.android.com/apk/res/android">
-
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -15,275 +14,298 @@
         android:paddingLeft="5dp"/>
 
 
-    <LinearLayout
-        android:orientation="horizontal"
+
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_below="@+id/textSettingsTitle"
-        android:id="@+id/hControls"
-        android:layout_alignParentStart="true">
+        >
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="Hue:"/>
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
-        <EditText
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:inputType="number"
-            android:ems="3"
-            android:id="@+id/editMinH"
-            android:textColor="#000000"
-            android:hint="Min"/>
+            <Spinner
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentStart="true"
+                android:layout_marginEnd="173dp"
+                android:id="@+id/spinnerSlot"
+                />
 
-        <View
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:id="@+id/minHView"
-            />
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/hControls"
+                android:layout_below="@+id/spinnerSlot"
+                android:layout_alignParentStart="true">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="to"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:text="Hue:"/>
 
-        <EditText
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:inputType="number"
-            android:ems="3"
-            android:id="@+id/editMaxH"
-            android:hint="Max"/>
+                <EditText
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:inputType="number"
+                    android:ems="3"
+                    android:id="@+id/editMinH"
+                    android:textColor="#000000"
+                    android:hint="Min"/>
 
-        <View
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:id="@+id/maxHView"/>
+                <View
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:id="@+id/minHView"
+                    />
 
-    </LinearLayout>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:text="to"/>
 
-    <LinearLayout
-        android:orientation="horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/hControls"
-        android:layout_alignParentStart="true"
-        android:id="@+id/sControls">
+                <EditText
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:inputType="number"
+                    android:ems="3"
+                    android:id="@+id/editMaxH"
+                    android:hint="Max"/>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="Saturation:"/>
+                <View
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:id="@+id/maxHView"/>
 
-        <EditText
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:inputType="number"
-            android:ems="3"
-            android:id="@+id/editMinS"
-            android:textColor="#000000"
-            android:hint="Min"/>
+            </LinearLayout>
 
-        <View
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:id="@+id/minSView"/>
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/hControls"
+                android:layout_alignParentStart="true"
+                android:id="@+id/sControls">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="to"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:text="Saturation:"/>
 
-        <EditText
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:inputType="number"
-            android:ems="3"
-            android:id="@+id/editMaxS"
-            android:hint="Max"/>
+                <EditText
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:inputType="number"
+                    android:ems="3"
+                    android:id="@+id/editMinS"
+                    android:textColor="#000000"
+                    android:hint="Min"/>
 
-        <View
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:id="@+id/maxSView"/>
-    </LinearLayout>
+                <View
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:id="@+id/minSView"/>
 
-    <LinearLayout
-        android:orientation="horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/sControls"
-        android:layout_alignParentStart="true"
-        android:id="@+id/vControls">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:text="to"/>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="Value:"/>
+                <EditText
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:inputType="number"
+                    android:ems="3"
+                    android:id="@+id/editMaxS"
+                    android:hint="Max"/>
 
-        <EditText
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:inputType="number"
-            android:ems="3"
-            android:id="@+id/editMinV"
-            android:textColor="#000000"
-            android:hint="Min"/>
+                <View
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:id="@+id/maxSView"/>
+            </LinearLayout>
 
-        <View
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:id="@+id/minVView"/>
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/sControls"
+                android:layout_alignParentStart="true"
+                android:id="@+id/vControls">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="to"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:text="Value:"/>
 
-        <EditText
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:inputType="number"
-            android:ems="3"
-            android:id="@+id/editMaxV"
-            android:hint="Max"/>
+                <EditText
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:inputType="number"
+                    android:ems="3"
+                    android:id="@+id/editMinV"
+                    android:textColor="#000000"
+                    android:hint="Min"/>
 
-        <View
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:id="@+id/maxVView"/>
-    </LinearLayout>
+                <View
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:id="@+id/minVView"/>
 
-    <LinearLayout
-        android:orientation="horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/vControls"
-        android:layout_alignParentStart="true"
-        android:id="@+id/areaControls">
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="Size: "
-            tools:text="Size: "/>
-        <EditText
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:inputType="number|numberDecimal"
-            android:ems="3"
-            android:id="@+id/editArea"
-            android:textColor="#000000"
-            />
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="% of image area"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:text="to"/>
+
+                <EditText
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:inputType="number"
+                    android:ems="3"
+                    android:id="@+id/editMaxV"
+                    android:hint="Max"/>
+
+                <View
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:id="@+id/maxVView"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/vControls"
+                android:layout_alignParentStart="true"
+                android:id="@+id/areaControls">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:text="Size: "
+                    tools:text="Size: "/>
+                <EditText
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:inputType="number|numberDecimal"
+                    android:ems="3"
+                    android:id="@+id/editArea"
+                    android:textColor="#000000"
+                    />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:text="% of image area"/>
 
 
 
-    </LinearLayout>
+            </LinearLayout>
 
-    <LinearLayout
-        android:orientation="horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/areaControls"
-        android:layout_alignParentStart="true"
-        android:id="@+id/solidityControls">
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/areaControls"
+                android:layout_alignParentStart="true"
+                android:id="@+id/solidityControls">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:id="@+id/solidityHeader"
-            android:text="Solidity:"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:id="@+id/solidityHeader"
+                    android:text="Solidity:"/>
 
-        <EditText
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:inputType="number|numberSigned"
-            android:ems="3"
-            android:id="@+id/editSolidity"
-            android:textColor="#000000"
-            />
+                <EditText
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:inputType="number|numberSigned"
+                    android:ems="3"
+                    android:id="@+id/editSolidity"
+                    android:textColor="#000000"
+                    />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="% of object area should be filled in"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:text="% of object area should be filled in"/>
 
-    </LinearLayout>
+            </LinearLayout>
 
-    <LinearLayout
-        android:orientation="horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/solidityControls"
-        android:layout_alignParentStart="true"
-        android:id="@+id/aspectRatioControls">
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/solidityControls"
+                android:layout_alignParentStart="true"
+                android:id="@+id/aspectRatioControls">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="Aspect Ratio:"
-            android:id="@+id/textTargetAspect"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:text="Aspect Ratio:"
+                    android:id="@+id/textTargetAspect"/>
 
-        <EditText
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:inputType="number|numberSigned"
-            android:ems="4"
-            android:id="@+id/editWidth"
-            android:textColor="#000000"
-            android:hint="Width"/>
+                <EditText
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:inputType="number|numberSigned"
+                    android:ems="4"
+                    android:id="@+id/editWidth"
+                    android:textColor="#000000"
+                    android:hint="Width"/>
 
-        <TextView
-            android:text="X"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+                <TextView
+                    android:text="X"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
 
-        <EditText
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:inputType="number|numberSigned"
-            android:ems="4"
-            android:id="@+id/editHeight"
-            android:hint="Height"/>
-    </LinearLayout>
+                <EditText
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:inputType="number|numberSigned"
+                    android:ems="4"
+                    android:id="@+id/editHeight"
+                    android:hint="Height"/>
+            </LinearLayout>
 
-    <LinearLayout
-        android:layout_height="wrap_content"
-        android:layout_width="match_parent"
-        android:id="@+id/targetNumberControls"
-        android:layout_below="@+id/aspectRatioControls"
-        android:layout_alignParentStart="true">
+            <LinearLayout
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:id="@+id/targetNumberControls"
+                android:layout_below="@+id/aspectRatioControls"
+                android:layout_alignParentStart="true">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="Number of Targets:"
-            android:id="@+id/numTargetsText"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:text="Number of Targets:"
+                    android:id="@+id/numTargetsText"/>
 
-        <EditText
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:inputType="numberSigned"
-            android:ems="2"
-            android:id="@+id/editNumTargets"
-            android:hint="#"/>
-    </LinearLayout>
+                <EditText
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:inputType="numberSigned"
+                    android:ems="2"
+                    android:id="@+id/editNumTargets"
+                    android:hint="#"/>
+            </LinearLayout>
+        </RelativeLayout>
+    </ScrollView>
+
 
 
 </RelativeLayout>

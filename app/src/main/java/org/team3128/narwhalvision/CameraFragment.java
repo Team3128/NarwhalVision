@@ -200,6 +200,11 @@ public class CameraFragment extends NarwhalVisionFragment implements CameraBridg
 	{
 		Mat rgbImg = inputFrame.rgba();
 
+		if(((NarwhalVisionActivity)getActivity()).executeCommands())
+		{
+			pipeline.loadSettings();
+		}
+
 		//handle touch selection
 //		if(userTouchedPixel)
 //		{
@@ -237,7 +242,7 @@ public class CameraFragment extends NarwhalVisionFragment implements CameraBridg
 //		}
 		Pair<Mat, ArrayList<TargetInformation>> result = pipeline.processImage(rgbImg, colorFilterSwitch.isChecked());
 
-		if(result.second != null)
+		if(result.second != null && result.second.size() > 0)
 		{
 			Log.v(TAG, "Sending Target: " + result.second);
 

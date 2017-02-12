@@ -7,6 +7,12 @@ import android.content.SharedPreferences;
  */
 public class Settings
 {
+	//which slot the settings will be saved from and loaded into
+	//takes effect when savePreferences() and loadPreferences() are called
+	public static int selectedSlot;
+
+	public static final int NUM_SLOTS=4;
+
 	//color thresholding settings
 	public static int lowH, highH, lowS, highS, lowV, highV;
 
@@ -21,6 +27,7 @@ public class Settings
 
 	//path to last image used in image test screen
 	//null if unselected
+	//NOTE: not affected by save slots
 	public static String testImagePath;
 
 	private static SharedPreferences prefs;
@@ -42,23 +49,25 @@ public class Settings
 	 */
 	static void loadPreferences()
 	{
-		//default settings from Tower Tracker are used here
-		lowH = prefs.getInt("lowH", 0);
-		lowS = prefs.getInt("lowS", 0);
-		lowV = prefs.getInt("lowV", 0);
+		selectedSlot = prefs.getInt("selectedSlot", 1);
 
-		highH = prefs.getInt("highH", 255);
-		highS = prefs.getInt("highS", 255);
-		highV = prefs.getInt("highV", 255);
+		//default settings from Tower Tracker are used here
+		lowH = prefs.getInt("lowH_" + selectedSlot, 0);
+		lowS = prefs.getInt("lowS_" + selectedSlot, 0);
+		lowV = prefs.getInt("lowV_" + selectedSlot, 0);
+
+		highH = prefs.getInt("highH_" + selectedSlot, 255);
+		highS = prefs.getInt("highS_" + selectedSlot, 255);
+		highV = prefs.getInt("highV_" + selectedSlot, 255);
 
 		testImagePath = prefs.getString("testImagePath", null);
 
-		minArea = prefs.getInt("numTargets", 1);
+		numTargets = prefs.getInt("numTargets_" + selectedSlot, 1);
 
-		minArea = prefs.getInt("minArea", 50);
-		targetSolidity = prefs.getInt("targetSolidity", 50);
-		targetHeight = prefs.getInt("targetHeight", 1);
-		targetWidth = prefs.getInt("targetWidth", 1);
+		minArea = prefs.getInt("minArea_" + selectedSlot, 50);
+		targetSolidity = prefs.getInt("targetSolidity_" + selectedSlot, 50);
+		targetHeight = prefs.getInt("targetHeight_" + selectedSlot, 1);
+		targetWidth = prefs.getInt("targetWidth_" + selectedSlot, 1);
 	}
 
 	/**
@@ -68,24 +77,40 @@ public class Settings
 	{
 		SharedPreferences.Editor editor = prefs.edit();
 
-		editor.putInt("lowH", lowH);
-		editor.putInt("lowS", lowS);
-		editor.putInt("lowV", lowV);
+		//make sure to do this one first
+		editor.putInt("selectedSlot", selectedSlot);
 
-		editor.putInt("highH", highH);
-		editor.putInt("highS", highS);
-		editor.putInt("highV", highV);
+		editor.putInt("lowH_" + selectedSlot, lowH);
+		editor.putInt("lowS_" + selectedSlot, lowS);
+		editor.putInt("lowV" + selectedSlot, lowV);
+
+		editor.putInt("highH_" + selectedSlot, highH);
+		editor.putInt("highS_" + selectedSlot, highS);
+		editor.putInt("highV_" + selectedSlot, highV);
 
 		editor.putString("testImagePath", testImagePath);
 
-		editor.putInt("numTargets", numTargets);
+		editor.putInt("numTargets_" + selectedSlot, numTargets);
 
-		editor.putInt("minArea", minArea);
-		editor.putInt("targetSolidity", targetSolidity);
-		editor.putInt("targetHeight", targetHeight);
-		editor.putInt("targetWidth", targetWidth);
+		editor.putInt("minArea_" + selectedSlot, minArea);
+		editor.putInt("targetSolidity_" + selectedSlot, targetSolidity);
+		editor.putInt("targetHeight_" + selectedSlot, targetHeight);
+		editor.putInt("targetWidth_" + selectedSlot, targetWidth);
 
 		editor.apply();
+	}
+
+	/**
+	 * Change the slot in use.
+	 * Reloads the preferences for this slot.
+	 * @param newSlot
+	 */
+	static void changeSlot(int newSlot)
+	{
+		selectedSlot = newSlot;
+		prefs.edit().putInt("selectedSlot", newSlot).apply();
+
+		loadPreferences();
 	}
 
 	/**
@@ -93,7 +118,6 @@ public class Settings
 	 */
 	static double getTargetAspectRatio()
 	{
-		//the phone is sideways, so horizontal and vertical are flipped
-		return  targetHeight / ((double)targetWidth);
+		return  targetWidth / ((double)targetHeight);
 	}
 }
